@@ -1,84 +1,106 @@
-
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { parseBuffer } from 'music-metadata';
 
-const MUSIC_DATA_PATH = path.resolve('src/data/music.json');
+// ===================== 配置区域 =====================
+const PLAYLIST_ID = '8754340379'; 
 
-// Helper to format duration in MM:SS
-function formatDuration(seconds) {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.floor(seconds % 60);
-  return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-}
+const REAL_COOKIE = process.env.NETEASE_COOKIE;
+const MUSIC_JSON_PATH = path.resolve('src/data/music.json');
+const LYRIC_DIR = path.resolve('public/lyrics');
+const LYRIC_URL_PREFIX = '/lyrics';
+// ===================================================
 
-async function fetchMusicDuration() {
+const formatDuration = (ms) => {
+  const totalSeconds = Math.floor(ms / 1000);
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+};
+
+const ensureDir = async (dir) => {
+  try { await fs.access(dir); } catch { await fs.mkdir(dir, { recursive: true }); }
+};
+
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+const HEADERS = {
+    'Referer': 'https://music.163.com/',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Cookie': REAL_COOKIE
+};
+
+const fetchLyrics = async (id) => {
   try {
-    const data = await fs.readFile(MUSIC_DATA_PATH, 'utf-8');
-    const musicList = JSON.parse(data);
-    let hasChanges = false;
+    const res = await fetch(`https://music.163.com/api/song/lyric?id=${id}&lv=1&kv=1&tv=-1`, {
+        headers: HEADERS
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.lrc?.lyric || null;
+  } catch (e) {
+    return null;
+  }
+};
 
-    console.log('🎵 Starting music duration fetch...');
+async function main() {
+  console.log(`🚀 开始同步网易云歌单: ${PLAYLIST_ID}`);
+  await ensureDir(LYRIC_DIR);
 
-    for (const item of musicList) {
-      if (item.url && !item.duration) {
-        console.log(`Processing: ${item.title} - ${item.artist}`);
-        try {
-            // Fetch only the first 500KB - typically enough for metadata
-            // Adjust range if metadata is at the end (like some ID3v1), but many valid FLAC/MP3 have it at start or we read enough.
-            // For remote files, we can use Range header to be efficient.
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+  try {
+    // 1. 获取歌单
+    const res = await fetch(`https://music.163.com/api/playlist/detail?id=${PLAYLIST_ID}`, {
+        headers: HEADERS
+    });
+    
+    if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+    const data = await res.json();
 
-            const response = await fetch(item.url, {
-                headers: {
-                    'Range': 'bytes=0-500000', // First 500KB
-                    'User-Agent': 'RyuChan-Build-Script/1.0' 
-                },
-                signal: controller.signal
-            });
-            clearTimeout(timeoutId);
+    if (data.code !== 200) {
+        console.error(`❌ API 依然拒绝访问，错误码: ${data.code}`);
+        console.error(`👉 Cookie 可能已失效，请重新登录网页版网易云并提取 Cookie。`);
+        return;
+    }
 
-            if (!response.ok && response.status !== 206) {
-                console.warn(`Failed to fetch ${item.url}: ${response.status} ${response.statusText}`);
-                continue;
-            }
+    const tracks = data.result.tracks;
+    console.log(`📊 成功获取权限！发现 ${tracks.length} 首歌曲...`);
+    
+    const musicList = [];
 
-            const arrayBuffer = await response.arrayBuffer();
-            const buffer = Buffer.from(arrayBuffer);
+    for (const track of tracks) {
+      // 强制 HTTPS
+      const secureCover = track.album.picUrl.replace(/^http:\/\//i, 'https://');
+      
+      const item = {
+        title: track.name,
+        artist: track.artists.map(a => a.name).join(' / '),
+        cover: secureCover,
+        url: `https://music.163.com/song/media/outer/url?id=${track.id}.mp3`,
+        duration: formatDuration(track.duration),
+        lrc: undefined
+      };
 
-            // Using parseBuffer since we have a chunk. 
-            // Note: If metadata is outside this chunk, this might fail or return undefined.
-            // For reliable results on variable inputs, we might need a tokenizer that can read from a web stream.
-            // But parseBuffer is simplest for a script.
-            const metadata = await parseBuffer(buffer, { mimeType: response.headers.get('content-type') });
-            
-            if (metadata && metadata.format && metadata.format.duration) {
-                const durationStr = formatDuration(metadata.format.duration);
-                item.duration = durationStr;
-                hasChanges = true;
-                console.log(`  -> Duration: ${durationStr}`);
-            } else {
-                console.warn(`  -> Could not determine duration from first 500KB`);
-            }
-
-        } catch (error) {
-           console.error(`  -> Error processing ${item.title}:`, error.message);
-        }
+      // 下载歌词
+      const lyricText = await fetchLyrics(track.id);
+      if (lyricText) {
+        const filename = `${track.id}.lrc`;
+        await fs.writeFile(path.join(LYRIC_DIR, filename), lyricText);
+        item.lrc = `${LYRIC_URL_PREFIX}/${filename}`;
+        process.stdout.write('✅ ');
+      } else {
+        process.stdout.write('⚪ ');
       }
+
+      musicList.push(item);
+      await sleep(200); 
     }
 
-    if (hasChanges) {
-      await fs.writeFile(MUSIC_DATA_PATH, JSON.stringify(musicList, null, 4), 'utf-8');
-      console.log('✅ Music data updated with durations.');
-    } else {
-      console.log('✨ No changes needed.');
-    }
-
-  } catch (error) {
-    console.error('Fatal error in music script:', error);
-    process.exit(1);
+    // 保存 JSON
+    await fs.writeFile(MUSIC_JSON_PATH, JSON.stringify(musicList, null, 4));
+    console.log(`\n\n🎉 同步成功！`);
+    
+  } catch (err) {
+    console.error('\n❌ 运行出错:', err.message);
   }
 }
 
-fetchMusicDuration();
+main();
