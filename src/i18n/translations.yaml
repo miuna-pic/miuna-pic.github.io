@@ -90,8 +90,8 @@ zh:
     posts: 篇文章
     tagDescription: 浏览此标签下的所有文章
     categoryDescription: 浏览此分类下的所有文章
-    tagsPageDescription: 探索博客中使用的所有标签
-    categoriesPageDescription: 探索博客中可用的所有分类
+    tagsPageDescription: 探索博客中的所有标签
+    categoriesPageDescription: 探索博客中的所有分类
     archivesPageDescription: 按日期浏览文章
     backToBlog: 返回博客
     themeToggle: 主题切换
