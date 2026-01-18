@@ -63,9 +63,9 @@ const initialSong = musicList[0] || {};
         constructor() {
             // First time init: assume elements are present
             this.playlist = JSON.parse(initialPlaylist);
-            this.currentIndex = 0;
+            this.currentIndex = Math.floor(Math.random() * this.playlist.length);
             this.isPlaying = false;
-            this.isShuffle = false;
+            this.isShuffle = true;
             // 'all' = Loop All (Sequential), 'one' = Loop One, 'off' = No Loop (Stop at end)
             this.repeatMode = 'all'; 
             this.lyrics = [];
@@ -82,7 +82,7 @@ const initialSong = musicList[0] || {};
 
             // Load initial song if needed
             if (this.playlist.length > 0 && this.audio && !this.audio.src) {
-               this.loadSong(0, false);
+               this.loadSong(this.currentIndex, false);
             }
             
             // Listen for future navigations
