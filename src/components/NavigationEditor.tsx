@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
 import { Loader2, Plus, GripVertical, Trash2, X, AlertCircle } from 'lucide-react';
 import { putFile, readTextFileFromRepo, toBase64Utf8 } from '@/lib/github-client';
 import { useAuthStore } from '@/components/write/hooks/use-auth';
@@ -159,218 +159,237 @@ export default function NavigationEditor() {
         setData(newData);
     };
 
-    if (!isOpen) {
-        return (
-            <>
-                <button
-                    onClick={handleOpen}
-                    className={`btn btn-circle shadow-sm ${isAuth ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
-                    title={isAuth ? "Edit Navigation" : "Import Key to Edit"}
-                >
-                    <GripVertical className="w-5 h-5" />
-                </button>
-                <input
-                    ref={keyInputRef}
-                    type='file'
-                    accept='.pem'
-                    className='hidden'
-                    onChange={async e => {
-                        const f = e.target.files?.[0];
-                        if (f) await onChoosePrivateKey(f);
-                        if (e.currentTarget) e.currentTarget.value = '';
-                    }}
-                />
-            </>
-        );
-    }
-
     return (
-        <div className="fixed inset-0 bg-base-100 z-[100] overflow-y-auto">
-            <div className="max-w-6xl mx-auto p-4 md:p-10 min-h-screen">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold flex items-center gap-2">
-                        <GripVertical className="w-8 h-8 text-primary" />
-                        Edit Navigation
-                    </h2>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => setIsOpen(false)}
-                            className="btn btn-ghost btn-circle"
-                        >
-                            <X className="w-6 h-6" />
-                        </button>
-                    </div>
-                </div>
+        <>
+            <Toaster
+                richColors
+                position="top-center"
+                toastOptions={{
+                    className: 'shadow-2xl border-2 border-base-200',
+                    style: {
+                        fontSize: '1.1rem',
+                        padding: '16px 24px',
+                    },
+                    classNames: {
+                        title: 'text-lg font-bold',
+                        description: 'text-base font-medium',
+                        error: 'bg-error text-error-content border-error',
+                        success: 'bg-success text-success-content border-success',
+                        warning: 'bg-warning text-warning-content border-warning',
+                        info: 'bg-info text-info-content border-info',
+                    }
+                }}
+            />
+            {!isOpen ? (
+                <>
+                    <button
+                        onClick={handleOpen}
+                        className={`btn btn-circle shadow-sm ${isAuth ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
+                        title={isAuth ? "Edit Navigation" : "Import Key to Edit"}
+                    >
+                        <GripVertical className="w-5 h-5" />
+                    </button>
+                    <input
+                        ref={keyInputRef}
+                        type='file'
+                        accept='.pem'
+                        className='hidden'
+                        onChange={async e => {
+                            const f = e.target.files?.[0];
+                            if (f) await onChoosePrivateKey(f);
+                            if (e.currentTarget) e.currentTarget.value = '';
+                        }}
+                    />
+                </>
+            ) : (
+                <div className="fixed inset-0 bg-base-100 z-[100] overflow-y-auto">
+                    <div className="max-w-6xl mx-auto p-4 md:p-10 min-h-screen">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold flex items-center gap-2">
+                                <GripVertical className="w-8 h-8 text-primary" />
+                                Edit Navigation
+                            </h2>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setIsOpen(false)}
+                                    className="btn btn-ghost btn-circle"
+                                >
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
+                        </div>
 
-                {loading && data.length === 0 ? (
-                    <div className="flex justify-center p-12">
-                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                    </div>
-                ) : (
-                    <div className="space-y-8">
-                        {data.map((cat, catIndex) => (
-                            <div key={catIndex} className="bg-base-200/50 rounded-xl p-4 border border-base-200">
-                                {/* Category Header */}
-                                <div className="flex gap-4 mb-4 items-center">
-                                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="form-control">
-                                            <label className="label text-xs font-bold text-base-content/60">CATEGORY TITLE</label>
-                                            <input
-                                                value={cat.title}
-                                                onChange={e => updateCategory(catIndex, 'title', e.target.value)}
-                                                className="input input-sm input-bordered w-full"
-                                            />
+                        {loading && data.length === 0 ? (
+                            <div className="flex justify-center p-12">
+                                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                            </div>
+                        ) : (
+                            <div className="space-y-8">
+                                {data.map((cat, catIndex) => (
+                                    <div key={catIndex} className="bg-base-200/50 rounded-xl p-4 border border-base-200">
+                                        {/* Category Header */}
+                                        <div className="flex gap-4 mb-4 items-center">
+                                            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="form-control">
+                                                    <label className="label text-xs font-bold text-base-content/60">CATEGORY TITLE</label>
+                                                    <input
+                                                        value={cat.title}
+                                                        onChange={e => updateCategory(catIndex, 'title', e.target.value)}
+                                                        className="input input-sm input-bordered w-full"
+                                                    />
+                                                </div>
+                                                <div className="form-control">
+                                                    <label className="label text-xs font-bold text-base-content/60">ICON (Lucide / Iconify)</label>
+                                                    <input
+                                                        value={cat.icon}
+                                                        onChange={e => updateCategory(catIndex, 'icon', e.target.value)}
+                                                        className="input input-sm input-bordered w-full font-mono text-xs"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => removeCategory(catIndex)}
+                                                className="btn btn-ghost btn-sm btn-square text-error mt-6"
+                                            >
+                                                <Trash2 className="w-5 h-5" />
+                                            </button>
                                         </div>
-                                        <div className="form-control">
-                                            <label className="label text-xs font-bold text-base-content/60">ICON (Lucide / Iconify)</label>
-                                            <input
-                                                value={cat.icon}
-                                                onChange={e => updateCategory(catIndex, 'icon', e.target.value)}
-                                                className="input input-sm input-bordered w-full font-mono text-xs"
-                                            />
+
+                                        {/* Items Grid */}
+                                        <div className="space-y-3 pl-4 border-l-2 border-base-300">
+                                            {cat.items.map((item, itemIndex) => (
+                                                <div key={itemIndex} className="bg-base-100 p-3 rounded-lg shadow-sm group hover:shadow-md transition-shadow border border-base-200">
+                                                    <div className="grid grid-cols-12 gap-2 items-center mb-2">
+                                                        <div className="col-span-12 md:col-span-3">
+                                                            <input
+                                                                placeholder="Name"
+                                                                value={item.name}
+                                                                onChange={e => updateItem(catIndex, itemIndex, 'name', e.target.value)}
+                                                                className="input input-xs input-bordered w-full font-bold"
+                                                            />
+                                                        </div>
+                                                        <div className="col-span-12 md:col-span-4">
+                                                            <input
+                                                                placeholder="Description"
+                                                                value={item.description}
+                                                                onChange={e => updateItem(catIndex, itemIndex, 'description', e.target.value)}
+                                                                className="input input-xs input-bordered w-full"
+                                                            />
+                                                        </div>
+                                                        <div className="col-span-12 md:col-span-3">
+                                                            <input
+                                                                placeholder="URL"
+                                                                value={item.url}
+                                                                onChange={e => updateItem(catIndex, itemIndex, 'url', e.target.value)}
+                                                                className="input input-xs input-bordered w-full text-blue-500"
+                                                            />
+                                                        </div>
+                                                        <div className="col-span-12 md:col-span-1">
+                                                            <input
+                                                                placeholder="Icon URL"
+                                                                value={item.avatar}
+                                                                onChange={e => updateItem(catIndex, itemIndex, 'avatar', e.target.value)}
+                                                                className="input input-xs input-bordered w-full"
+                                                            />
+                                                        </div>
+                                                        <div className="col-span-12 md:col-span-1 flex justify-end">
+                                                            <button
+                                                                onClick={() => removeItem(catIndex, itemIndex)}
+                                                                className="btn btn-ghost btn-xs btn-square text-error opacity-20 group-hover:opacity-100"
+                                                            >
+                                                                <X className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    {/* Badge Settings Row */}
+                                                    <div className="grid grid-cols-12 gap-2 items-center pt-2 border-t border-base-200/50">
+                                                        <div className="col-span-4 md:col-span-3">
+                                                            <span className="text-[10px] text-base-content/40 uppercase font-bold px-1">Badge:</span>
+                                                            <input
+                                                                placeholder="Text (e.g. Hot)"
+                                                                value={item.badge || ''}
+                                                                onChange={e => updateItem(catIndex, itemIndex, 'badge', e.target.value)}
+                                                                className="input input-xs input-ghost w-full"
+                                                            />
+                                                        </div>
+                                                        <div className="col-span-4 md:col-span-3">
+                                                            <span className="text-[10px] text-base-content/40 uppercase font-bold px-1">Icon:</span>
+                                                            <input
+                                                                placeholder="Icon (e.g. lucide:star)"
+                                                                value={item.badgeIcon || ''}
+                                                                onChange={e => updateItem(catIndex, itemIndex, 'badgeIcon', e.target.value)}
+                                                                className="input input-xs input-ghost w-full font-mono"
+                                                            />
+                                                        </div>
+                                                        <div className="col-span-4 md:col-span-3">
+                                                            <span className="text-[10px] text-base-content/40 uppercase font-bold px-1">Color:</span>
+                                                            <select
+                                                                value={item.badgeColor || ''}
+                                                                onChange={e => updateItem(catIndex, itemIndex, 'badgeColor', e.target.value)}
+                                                                className="select select-ghost select-xs w-full"
+                                                            >
+                                                                <option value="">Default (Gray)</option>
+                                                                <option value="primary">Primary</option>
+                                                                <option value="secondary">Secondary</option>
+                                                                <option value="accent">Accent</option>
+                                                                <option value="info">Info</option>
+                                                                <option value="success">Success</option>
+                                                                <option value="warning">Warning</option>
+                                                                <option value="error">Error</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    {/* Meta Info Row */}
+                                                    <div className="grid grid-cols-12 gap-2 items-center pt-2 border-t border-base-200/50">
+                                                        <div className="col-span-6 md:col-span-6">
+                                                            <span className="text-[10px] text-base-content/40 uppercase font-bold px-1">Category Label:</span>
+                                                            <input
+                                                                placeholder="Display Category"
+                                                                value={item.category || ''}
+                                                                onChange={e => updateItem(catIndex, itemIndex, 'category', e.target.value)}
+                                                                className="input input-xs input-ghost w-full"
+                                                            />
+                                                        </div>
+                                                        <div className="col-span-6 md:col-span-6">
+                                                            <span className="text-[10px] text-base-content/40 uppercase font-bold px-1">Unique ID:</span>
+                                                            <input
+                                                                placeholder="ID (e.g. DEV001)"
+                                                                value={item.id || ''}
+                                                                onChange={e => updateItem(catIndex, itemIndex, 'id', e.target.value)}
+                                                                className="input input-xs input-ghost w-full font-mono"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            <button
+                                                onClick={() => addItem(catIndex)}
+                                                className="btn btn-ghost btn-sm btn-block border-dashed border-2 border-base-300 text-base-content/40 hover:border-primary hover:text-primary"
+                                            >
+                                                <Plus className="w-4 h-4 mr-2" /> Add Site
+                                            </button>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={() => removeCategory(catIndex)}
-                                        className="btn btn-ghost btn-sm btn-square text-error mt-6"
-                                    >
-                                        <Trash2 className="w-5 h-5" />
-                                    </button>
-                                </div>
+                                ))}
 
-                                {/* Items Grid */}
-                                <div className="space-y-3 pl-4 border-l-2 border-base-300">
-                                    {cat.items.map((item, itemIndex) => (
-                                        <div key={itemIndex} className="bg-base-100 p-3 rounded-lg shadow-sm group hover:shadow-md transition-shadow border border-base-200">
-                                            <div className="grid grid-cols-12 gap-2 items-center mb-2">
-                                                <div className="col-span-12 md:col-span-3">
-                                                    <input
-                                                        placeholder="Name"
-                                                        value={item.name}
-                                                        onChange={e => updateItem(catIndex, itemIndex, 'name', e.target.value)}
-                                                        className="input input-xs input-bordered w-full font-bold"
-                                                    />
-                                                </div>
-                                                <div className="col-span-12 md:col-span-4">
-                                                    <input
-                                                        placeholder="Description"
-                                                        value={item.description}
-                                                        onChange={e => updateItem(catIndex, itemIndex, 'description', e.target.value)}
-                                                        className="input input-xs input-bordered w-full"
-                                                    />
-                                                </div>
-                                                <div className="col-span-12 md:col-span-3">
-                                                    <input
-                                                        placeholder="URL"
-                                                        value={item.url}
-                                                        onChange={e => updateItem(catIndex, itemIndex, 'url', e.target.value)}
-                                                        className="input input-xs input-bordered w-full text-blue-500"
-                                                    />
-                                                </div>
-                                                <div className="col-span-12 md:col-span-1">
-                                                    <input
-                                                        placeholder="Icon URL"
-                                                        value={item.avatar}
-                                                        onChange={e => updateItem(catIndex, itemIndex, 'avatar', e.target.value)}
-                                                        className="input input-xs input-bordered w-full"
-                                                    />
-                                                </div>
-                                                <div className="col-span-12 md:col-span-1 flex justify-end">
-                                                    <button
-                                                        onClick={() => removeItem(catIndex, itemIndex)}
-                                                        className="btn btn-ghost btn-xs btn-square text-error opacity-20 group-hover:opacity-100"
-                                                    >
-                                                        <X className="w-4 h-4" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            {/* Badge Settings Row */}
-                                            <div className="grid grid-cols-12 gap-2 items-center pt-2 border-t border-base-200/50">
-                                                <div className="col-span-4 md:col-span-3">
-                                                    <span className="text-[10px] text-base-content/40 uppercase font-bold px-1">Badge:</span>
-                                                    <input
-                                                        placeholder="Text (e.g. Hot)"
-                                                        value={item.badge || ''}
-                                                        onChange={e => updateItem(catIndex, itemIndex, 'badge', e.target.value)}
-                                                        className="input input-xs input-ghost w-full"
-                                                    />
-                                                </div>
-                                                <div className="col-span-4 md:col-span-3">
-                                                    <span className="text-[10px] text-base-content/40 uppercase font-bold px-1">Icon:</span>
-                                                    <input
-                                                        placeholder="Icon (e.g. lucide:star)"
-                                                        value={item.badgeIcon || ''}
-                                                        onChange={e => updateItem(catIndex, itemIndex, 'badgeIcon', e.target.value)}
-                                                        className="input input-xs input-ghost w-full font-mono"
-                                                    />
-                                                </div>
-                                                <div className="col-span-4 md:col-span-3">
-                                                    <span className="text-[10px] text-base-content/40 uppercase font-bold px-1">Color:</span>
-                                                    <select
-                                                        value={item.badgeColor || ''}
-                                                        onChange={e => updateItem(catIndex, itemIndex, 'badgeColor', e.target.value)}
-                                                        className="select select-ghost select-xs w-full"
-                                                    >
-                                                        <option value="">Default (Gray)</option>
-                                                        <option value="primary">Primary</option>
-                                                        <option value="secondary">Secondary</option>
-                                                        <option value="accent">Accent</option>
-                                                        <option value="info">Info</option>
-                                                        <option value="success">Success</option>
-                                                        <option value="warning">Warning</option>
-                                                        <option value="error">Error</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            {/* Meta Info Row */}
-                                            <div className="grid grid-cols-12 gap-2 items-center pt-2 border-t border-base-200/50">
-                                                <div className="col-span-6 md:col-span-6">
-                                                    <span className="text-[10px] text-base-content/40 uppercase font-bold px-1">Category Label:</span>
-                                                    <input
-                                                        placeholder="Display Category"
-                                                        value={item.category || ''}
-                                                        onChange={e => updateItem(catIndex, itemIndex, 'category', e.target.value)}
-                                                        className="input input-xs input-ghost w-full"
-                                                    />
-                                                </div>
-                                                <div className="col-span-6 md:col-span-6">
-                                                    <span className="text-[10px] text-base-content/40 uppercase font-bold px-1">Unique ID:</span>
-                                                    <input
-                                                        placeholder="ID (e.g. DEV001)"
-                                                        value={item.id || ''}
-                                                        onChange={e => updateItem(catIndex, itemIndex, 'id', e.target.value)}
-                                                        className="input input-xs input-ghost w-full font-mono"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
+                                <div className="flex gap-4 pt-4 border-t border-base-200">
+                                    <button onClick={addCategory} className="btn btn-outline gap-2">
+                                        <Plus className="w-4 h-4" /> Add Category
+                                    </button>
+                                    <div className="flex-1"></div>
                                     <button
-                                        onClick={() => addItem(catIndex)}
-                                        className="btn btn-ghost btn-sm btn-block border-dashed border-2 border-base-300 text-base-content/40 hover:border-primary hover:text-primary"
+                                        onClick={handleSave}
+                                        disabled={loading}
+                                        className="btn btn-primary px-8 gap-2"
                                     >
-                                        <Plus className="w-4 h-4 mr-2" /> Add Site
+                                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Changes'}
                                     </button>
                                 </div>
                             </div>
-                        ))}
-
-                        <div className="flex gap-4 pt-4 border-t border-base-200">
-                            <button onClick={addCategory} className="btn btn-outline gap-2">
-                                <Plus className="w-4 h-4" /> Add Category
-                            </button>
-                            <div className="flex-1"></div>
-                            <button
-                                onClick={handleSave}
-                                disabled={loading}
-                                className="btn btn-primary px-8 gap-2"
-                            >
-                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Changes'}
-                            </button>
-                        </div>
+                        )}
                     </div>
-                )}
-            </div>
-        </div>
+                </div>
+            )}
+        </>
     );
 }

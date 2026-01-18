@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from 'react';
-import { toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
 import { Loader2, Image as ImageIcon, Send, X } from 'lucide-react';
 import { putFile, getFileSha, readTextFileFromRepo, toBase64Utf8 } from '@/lib/github-client';
 import { readFileAsText } from '@/lib/file-utils';
@@ -148,6 +148,25 @@ export default function MomentsEditor() {
 
     return (
         <div className="bg-base-100 border border-base-200 shadow-sm rounded-xl p-4 mb-8 transition-all hover:shadow-md">
+            <Toaster
+                richColors
+                position="top-center"
+                toastOptions={{
+                    className: 'shadow-2xl border-2 border-base-200',
+                    style: {
+                        fontSize: '1.1rem',
+                        padding: '16px 24px',
+                    },
+                    classNames: {
+                        title: 'text-lg font-bold',
+                        description: 'text-base font-medium',
+                        error: 'bg-error text-error-content border-error',
+                        success: 'bg-success text-success-content border-success',
+                        warning: 'bg-warning text-warning-content border-warning',
+                        info: 'bg-info text-info-content border-info',
+                    }
+                }}
+            />
             {/* Hidden Key Input */}
             <input
                 ref={keyInputRef}
