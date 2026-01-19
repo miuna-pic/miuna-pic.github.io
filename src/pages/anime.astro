@@ -184,7 +184,7 @@ interface AnimeItem {
   poster: string | null;
   type: string;
   source: string;
-  rating: number | string;
+  rating: number;
   date: string;
   overview: string;
   link: string;
@@ -208,7 +208,7 @@ let animeList: AnimeItem[] = animeData.flatMap((group) => group.items || []).map
     poster: anime.poster_path ? TMDB_IMG + anime.poster_path : null,
     type: type,
     source: 'tmdb',
-    rating: anime.vote_average || 0,
+    rating: Number(anime.vote_average) || 0,
     date: date,
     overview: anime.overview,
     link: `https://www.themoviedb.org/${type}/${anime.id}`,
@@ -225,7 +225,7 @@ if (bilibiliItems.length > 0) {
     poster: item.cover ? item.cover.replace('http://', 'https://') : null,
     type: item.season_type_name === '剧场版' || item.season_type_name === '电影' ? 'movie' : 'tv',
     source: 'bilibili',
-    rating: item.rating && item.rating.score ? item.rating.score : 0,
+    rating: item.rating && item.rating.score ? Number(item.rating.score) : 0,
     date: '', 
     overview: item.evaluate || item.brief || "暂无简介",
     link: `https://www.bilibili.com/bangumi/play/ss${item.season_id}`,
@@ -253,7 +253,7 @@ if (bangumiItems.length > 0) {
             poster: subject.images?.large || subject.images?.common || null,
             type: 'tv', // Bangumi API result might not explicitly say 'movie' in this simplified view without looking up subject type ID map. Default to TV.
             source: 'bangumi',
-            rating: subject.score || 0,
+            rating: Number(subject.score) || 0,
             date: subject.date || '',
             overview: subject.short_summary || "暂无简介", // v0 might provide short_summary
             link: `https://bgm.tv/subject/${subject.id}`,
