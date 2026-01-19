@@ -251,7 +251,7 @@ const themes = [
           </div>
         </summary>
         <div class="p-2 bg-base-100 rounded-box" onclick="event.stopPropagation()">
-          <button id="chaos-btn" class="btn btn-sm btn-error w-full font-bold text-white animate-pulse">
+          <button id="chaos-btn" class="btn btn-sm btn-error w-full font-bold text-white chaos-btn-animate">
              DO NOT PRESS
           </button>
         </div>
@@ -807,7 +807,7 @@ const themes = [
         }
 
         let hue = 0;
-        let rotation = 0;
+
 
         // Visual Chaos Loop (Colors)
         setInterval(() => {
@@ -825,13 +825,7 @@ const themes = [
             document.body.style.color = colorFunc;
         }, 100); 
 
-        // Smooth Rotation Loop
-        const animateRotation = () => {
-             rotation += 0.5; 
-             document.body.style.transform = `rotate(${rotation}deg)`;
-             if (isChaosRunning) requestAnimationFrame(animateRotation);
-        };
-        requestAnimationFrame(animateRotation);
+
     }
 
     // Observer for external changes
@@ -856,3 +850,13 @@ const themes = [
     });
   });
 </script>
+
+<style>
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(0.9); }
+  }
+  .chaos-btn-animate {
+    animation: breathe 2s infinite ease-in-out;
+  }
+</style>
