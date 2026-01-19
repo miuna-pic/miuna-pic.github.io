@@ -17,7 +17,7 @@
     "name": "兰空图床",
     "avatar": "https://pic.000.moe/pic/696b584856609.png",
     "description": "✨ 私人图床喵，配备随机图api~",
-    "url": "https://pic.000.moe",
+    "url": "https://pic.000.moe/random",
     "badge": "Picture"
   },
   {
@@ -47,5 +47,12 @@
     "description": "🎉监听Web服务似了嘛",
     "url": "https://ping.000.moe",
     "badge": "Uptime"
+  },
+  {
+    "name": "Umami",
+    "avatar": "https://pic.000.moe/pic/696e112290b8c.png",
+    "description": "🎄网站访问量统计工具",
+    "url": "https://umami.000.moe/share/XaITv25F0qy9CV30",
+    "badge": "Umami"
   }
 ]
