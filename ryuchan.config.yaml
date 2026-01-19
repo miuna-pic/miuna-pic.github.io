@@ -5,7 +5,7 @@ site:
   language: zh
   favicon: /favicon.ico
   theme:
-    light: synthwave
+    light: garden
     dark: synthwave
     code: github-dark
   date_format: ddd MMM DD YYYY
