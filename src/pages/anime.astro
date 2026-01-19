@@ -177,8 +177,22 @@ if (!Array.isArray(animeData)) {
   animeData = [animeData];
 }
 
+interface AnimeItem {
+  id: number | string;
+  title: string;
+  originalTitle: string;
+  poster: string | null;
+  type: string;
+  source: string;
+  rating: number | string;
+  date: string;
+  overview: string;
+  link: string;
+  epStatus?: string;
+}
+
 // 展平并标准化数据
-let animeList = animeData.flatMap((group) => group.items || []).map(anime => {
+let animeList: AnimeItem[] = animeData.flatMap((group) => group.items || []).map(anime => {
   // 统一处理 TV 和 Movie 的字段差异
   // Movie: title, original_title, release_date
   // TV: name, original_name, first_air_date
