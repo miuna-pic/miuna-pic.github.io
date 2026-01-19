@@ -36,13 +36,13 @@ const themes = [
 ---
 
 <div class="dropdown dropdown-end">
-  <div tabindex="0" role="button" class="btn btn-ghost btn-circle btn-sm hover:bg-transparent text-primary" title="Settings">
+  <div tabindex="0" role="button" class="btn btn-ghost btn-circle hover:bg-white/10 text-primary" title="Settings">
     <Icon name="material-symbols:settings-outline" class="w-6 h-6" />
   </div>
-  <ul tabindex="0" class="dropdown-content z-[100] menu p-2 shadow-2xl bg-base-200 rounded-box w-64 mt-4">
+  <ul tabindex="0" class="dropdown-content z-[100] menu p-2 shadow-2xl bg-base-100 rounded-box w-64 mt-4 border border-base-200">
     <!-- Dark/Light Toggle -->
     <li>
-      <button id="mobile-theme-toggle" class="flex justify-between items-center gap-2 p-2 hover:bg-base-300 rounded-lg w-full">
+      <button id="desktop-theme-toggle" class="flex justify-between items-center gap-2 p-2 hover:bg-base-200 rounded-lg w-full">
         <span class="font-medium">Dark/Light</span>
         <div class="btn btn-ghost btn-circle btn-sm text-primary hover:bg-primary/10 hover:scale-110 transition-all duration-300 pointer-events-none flex items-center justify-center">
           <Icon name="line-md:moon-alt-to-sunny-outline-loop-transition" class="w-5 h-5 light-icon" />
@@ -54,7 +54,7 @@ const themes = [
     <!-- Banner Mode Settings -->
     <li>
       <details>
-        <summary class="font-medium flex justify-between items-center p-2 hover:bg-base-300 rounded-lg w-full">
+        <summary class="font-medium flex justify-between items-center p-2 hover:bg-base-200 rounded-lg w-full">
           <div class="flex items-center gap-2">
             <Icon name="material-symbols:image-outline" class="w-5 h-5" />
             Banner Mode
@@ -62,25 +62,25 @@ const themes = [
         </summary>
         <ul class="p-2 bg-base-100 rounded-box">
           <li>
-            <button data-set-banner-mobile="normal" class="flex gap-2">
+            <button data-set-banner-desktop="normal" class="flex gap-2">
               <Icon name="material-symbols:panorama-outline" class="w-5 h-5" />
               Normal
             </button>
           </li>
           <li>
-            <button data-set-banner-mobile="fullscreen" class="flex gap-2">
+            <button data-set-banner-desktop="fullscreen" class="flex gap-2">
               <Icon name="material-symbols:fullscreen" class="w-5 h-5" />
               Fullscreen
             </button>
           </li>
           <li>
-            <button data-set-banner-mobile="background" class="flex gap-2">
+            <button data-set-banner-desktop="background" class="flex gap-2">
               <Icon name="material-symbols:wallpaper" class="w-5 h-5" />
               Background
             </button>
           </li>
           <li>
-            <button data-set-banner-mobile="hidden" class="flex gap-2">
+            <button data-set-banner-desktop="hidden" class="flex gap-2">
               <Icon name="material-symbols:hide-image-outline" class="w-5 h-5" />
               Hidden
             </button>
@@ -91,7 +91,7 @@ const themes = [
 
     <!-- Config Button -->
     <li>
-      <a href="/config" class="flex justify-between items-center p-2 hover:bg-base-300 rounded-lg w-full">
+      <a href="/config" class="flex justify-between items-center p-2 hover:bg-base-200 rounded-lg w-full">
         <div class="flex items-center gap-2">
           <Icon name="material-symbols:settings-outline" class="w-5 h-5" />
           <span class="font-medium">Config</span>
@@ -102,7 +102,7 @@ const themes = [
     <!-- Theme Selector -->
     <li>
       <details>
-        <summary class="font-medium flex justify-between items-center p-2 hover:bg-base-300 rounded-lg w-full">
+        <summary class="font-medium flex justify-between items-center p-2 hover:bg-base-200 rounded-lg w-full">
           <div class="flex items-center gap-2">
             <Icon name="material-symbols:palette-outline" class="w-5 h-5" />
             Theme
@@ -113,7 +113,7 @@ const themes = [
             <li>
               <button
                 class="flex gap-3 items-center"
-                data-set-theme-mobile={theme.name}
+                data-set-theme-desktop={theme.name}
                 aria-label={`Change theme to ${theme.name}`}
               >
                 <span class="w-4 h-4 rounded-full border border-base-content/20" style={`background-color: ${theme.color};`}></span>
@@ -128,87 +128,85 @@ const themes = [
     <!-- Custom Theme -->
     <li>
       <details>
-        <summary class="font-medium flex justify-between items-center p-2 hover:bg-base-300 rounded-lg w-full">
+        <summary class="font-medium flex justify-between items-center p-2 hover:bg-base-200 rounded-lg w-full">
           <div class="flex items-center gap-2">
-            <Icon name="material-symbols:format-paint" class="w-6 h-6" />
+            <Icon name="material-symbols:format-paint" class="w-5 h-5" />
             Custom Theme
           </div>
         </summary>
-        <ul class="p-2 bg-base-100 rounded-box">
-          <li>
-            <label class="flex justify-between items-center p-2 bg-base-100 rounded-lg">
-              <span class="font-medium">Primary Color</span>
-              <input type="color" id="mobile-custom-primary-picker" class="w-8 h-8 rounded cursor-pointer border-none bg-transparent" />
-            </label>
-          </li>
-          <li>
-            <button id="mobile-reset-custom-theme" class="btn btn-sm btn-outline btn-error w-full">Reset to Preset</button>
-          </li>
-        </ul>
+        <div class="p-2 bg-base-100 rounded-box flex flex-col gap-2">
+          <div class="flex justify-between items-center px-1">
+            <span class="text-sm">Primary Color</span>
+            <input type="color" id="custom-primary-picker" class="w-6 h-6 rounded cursor-pointer border-none bg-transparent" />
+          </div>
+          <button id="reset-custom-theme" class="btn btn-xs btn-outline w-full mt-2">Reset to Preset</button>
+        </div>
       </details>
     </li>
 
     <!-- Network Status -->
-    <div class="collapse collapse-arrow bg-base-200">
-      <input type="checkbox" /> 
-      <div class="collapse-title flex items-center gap-3 font-medium">
-        <Icon name="material-symbols:wifi" class="w-6 h-6" />
-        Network Status
-      </div>
-      <div class="collapse-content">
-        <div class="flex flex-col gap-2 pt-2 pb-2">
+    <li>
+      <details>
+        <summary class="font-medium flex justify-between items-center p-2 hover:bg-base-200 rounded-lg w-full">
+          <div class="flex items-center gap-2">
+            <Icon name="material-symbols:wifi" class="w-5 h-5" />
+            Network Status
+          </div>
+        </summary>
+        <div class="p-2 bg-base-100 rounded-box flex flex-col gap-2 cursor-default">
           <div class="flex justify-between items-center px-1">
             <span class="text-sm">Ping</span>
-            <span id="mobile-network-ping" class="text-xs font-bold font-mono">-- ms</span>
+            <span id="network-ping" class="text-xs font-bold font-mono">-- ms</span>
           </div>
           <div class="flex justify-between items-center px-1">
             <span class="text-sm">IP</span>
-            <span id="mobile-network-ip" class="text-xs font-mono truncate max-w-[150px]">...</span>
+            <span id="network-ip" class="text-xs font-mono truncate max-w-[120px]">...</span>
           </div>
-          <button id="mobile-refresh-network-status" class="btn btn-sm btn-outline w-full mt-1">Refresh</button>
+          <button id="refresh-network-status" class="btn btn-xs btn-outline w-full mt-1">Refresh</button>
         </div>
-      </div>
-    </div>
+      </details>
+    </li>
 
     <!-- Base64 Tool -->
-    <div class="collapse collapse-arrow bg-base-200">
-      <input type="checkbox" /> 
-      <div class="collapse-title flex items-center gap-3 font-medium">
-        <Icon name="material-symbols:code" class="w-6 h-6" />
-        Base64 Tool
-      </div>
-      <div class="collapse-content">
-        <div class="flex flex-col gap-2 pt-2 pb-2">
-           <textarea id="mobile-b64-input" class="textarea textarea-bordered textarea-sm w-full h-20 resize-none" placeholder="Input..."></textarea>
-           <div class="grid grid-cols-2 gap-2">
-             <button id="mobile-b64-encode-btn" class="btn btn-sm btn-primary">Encode</button>
-             <button id="mobile-b64-decode-btn" class="btn btn-sm btn-secondary">Decode</button>
-           </div>
-           <div class="relative">
-             <textarea id="mobile-b64-output" class="textarea textarea-bordered textarea-sm w-full h-20 resize-none font-mono" placeholder="Result..." readonly></textarea>
-             <button id="mobile-b64-copy-btn" class="btn btn-sm btn-ghost btn-square absolute top-1 right-1" title="Copy">
-                <Icon name="material-symbols:content-copy-outline" class="w-5 h-5" />
-             </button>
-           </div>
+    <li>
+      <details>
+        <summary class="font-medium flex justify-between items-center p-2 hover:bg-base-200 rounded-lg w-full">
+          <div class="flex items-center gap-2">
+            <Icon name="material-symbols:code" class="w-5 h-5" />
+            Base64 Tool
+          </div>
+        </summary>
+        <div class="p-2 bg-base-100 rounded-box flex flex-col gap-2">
+          <textarea id="b64-input" class="textarea textarea-bordered textarea-xs w-full h-16 resize-none" placeholder="Input..."></textarea>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="b64-encode-btn" class="btn btn-xs btn-primary">Encode</button>
+            <button id="b64-decode-btn" class="btn btn-xs btn-secondary">Decode</button>
+          </div>
+          <div class="relative">
+            <textarea id="b64-output" class="textarea textarea-bordered textarea-xs w-full h-16 resize-none font-mono" placeholder="Result..." readonly></textarea>
+            <button id="b64-copy-btn" class="btn btn-xs btn-ghost btn-square absolute top-1 right-1" title="Copy">
+               <Icon name="material-symbols:content-copy-outline" class="w-4 h-4" />
+            </button>
+          </div>
         </div>
-      </div>
-    </div>
+      </details>
+    </li>
   </ul>
 </div>
 
 <script is:inline define:vars={{ SITE_THEME }}>
   document.addEventListener("astro:page-load", () => {
+    // ... (Existing Theme Helper & Color Logic)
     // Theme Helper
     const isDarkTheme = (theme) => ['dark', 'synthwave', 'halloween', 'forest', 'black', 'luxury', 'dracula', 'business', 'night', 'coffee', 'dim', 'sunset'].includes(theme);
 
-    // Base64 Logic (Mobile)
-    const mb64Input = document.getElementById('mobile-b64-input');
-    const mb64Output = document.getElementById('mobile-b64-output');
-    const mb64Encode = document.getElementById('mobile-b64-encode-btn');
-    const mb64Decode = document.getElementById('mobile-b64-decode-btn');
-    const mb64Copy = document.getElementById('mobile-b64-copy-btn');
+    // Base64 Logic
+    const b64Input = document.getElementById('b64-input');
+    const b64Output = document.getElementById('b64-output');
+    const b64Encode = document.getElementById('b64-encode-btn');
+    const b64Decode = document.getElementById('b64-decode-btn');
+    const b64Copy = document.getElementById('b64-copy-btn');
 
-    // Helper functions (scoped to this listener, safe to redeclare)
     const utf8_to_b64 = (str) => {
         try {
             return window.btoa(unescape(encodeURIComponent(str)));
@@ -225,31 +223,33 @@ const themes = [
         }
     };
 
-    if (mb64Encode && mb64Decode && mb64Input && mb64Output) {
-        mb64Encode.addEventListener('click', () => {
-            mb64Output.value = utf8_to_b64(mb64Input.value);
+    if (b64Encode && b64Decode && b64Input && b64Output) {
+        b64Encode.addEventListener('click', () => {
+            b64Output.value = utf8_to_b64(b64Input.value);
         });
 
-        mb64Decode.addEventListener('click', () => {
-            mb64Output.value = b64_to_utf8(mb64Input.value);
+        b64Decode.addEventListener('click', () => {
+            b64Output.value = b64_to_utf8(b64Input.value);
         });
         
-        if (mb64Copy) {
-            mb64Copy.addEventListener('click', () => {
-                if (mb64Output.value) {
-                    navigator.clipboard.writeText(mb64Output.value);
-                    // Visual feedback
-                    mb64Copy.classList.add('text-success');
-                    setTimeout(() => mb64Copy.classList.remove('text-success'), 1000);
+        if (b64Copy) {
+            b64Copy.addEventListener('click', () => {
+                if (b64Output.value) {
+                    navigator.clipboard.writeText(b64Output.value);
+                    // Visual feedback could be added here
+                    b64Copy.classList.add('text-success');
+                    setTimeout(() => b64Copy.classList.remove('text-success'), 1000);
                 }
             });
         }
     }
 
-    // Network Status Logic (Mobile)
-    const checkMobileNetworkStatus = async () => {
-        const pingEl = document.getElementById('mobile-network-ping');
-        const ipEl = document.getElementById('mobile-network-ip');
+    // Network Status Logic
+    const checkNetworkStatus = async () => {
+        const pingEl = document.getElementById('network-ping');
+    const checkNetworkStatus = async () => {
+        const pingEl = document.getElementById('network-ping');
+        const ipEl = document.getElementById('network-ip');
         if (!pingEl || !ipEl) return;
 
         pingEl.textContent = 'Testing...';
@@ -286,14 +286,21 @@ const themes = [
         }
     };
 
-    const mobileRefreshBtn = document.getElementById('mobile-refresh-network-status');
-    if (mobileRefreshBtn) {
-        mobileRefreshBtn.addEventListener('click', checkMobileNetworkStatus);
+    const refreshBtn = document.getElementById('refresh-network-status');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', checkNetworkStatus);
         // Initial check
-        checkMobileNetworkStatus();
+        checkNetworkStatus();
     }
 
-    // Color conversion helper (Hex to OKLCH)
+    // Color conversion helper (Hex to OKLCH approximation)
+    // ... (rest of the script)
+    // Since implementing full conversion is heavy, we will use a simplified approach
+    // or rely on the fact that we can set hex if we don't strictly need OKLCH channels?
+    // NO, global.scss uses `oklch(var(--p))`. We match that format.
+    // Source: https://github.com/mina86/hex-to-oklch/ (simplified)
+    // Actually, we can use a simpler sRGB to Linear to OKLCH flow.
+    
     function hexToRgb(hex) {
        const bigint = parseInt(hex.slice(1), 16);
        const r = (bigint >> 16) & 255;
@@ -327,6 +334,8 @@ const themes = [
         let H = Math.atan2(b_, a) * 180 / Math.PI;
         if (H < 0) H += 360;
         
+        // Return format for CSS [L C H]
+        // Truncate decimals to save space
         return `${L.toFixed(3)} ${C.toFixed(3)} ${H.toFixed(3)}`;
     }
 
@@ -334,61 +343,50 @@ const themes = [
         const [r, g, b] = hexToRgb(hex);
         const oklch = rgbToOklch(r, g, b);
         document.documentElement.style.setProperty('--p', oklch);
-        document.documentElement.style.setProperty('--s', oklch); 
-        document.documentElement.style.setProperty('--a', oklch);
+        document.documentElement.style.setProperty('--s', oklch); // Set secondary too?
+        document.documentElement.style.setProperty('--a', oklch); // Set accent too?
+        // Usually Primary is enough.
         localStorage.setItem('custom-primary-hex', hex);
-        
-        // Update both pickers if they exist
-        const desktopPicker = document.getElementById('custom-primary-picker');
-        const mobilePicker = document.getElementById('mobile-custom-primary-picker');
-        if (desktopPicker) desktopPicker.value = hex;
-        if (mobilePicker) mobilePicker.value = hex;
     }
 
-    // Initialize Custom Color (Mobile)
+    // Initialize Custom Color
     const storedCustomHex = localStorage.getItem('custom-primary-hex');
-    const mobilePicker = document.getElementById('mobile-custom-primary-picker');
-    if (storedCustomHex && mobilePicker) {
-        mobilePicker.value = storedCustomHex;
-        // Don't need to call updateCustomColor here if Desktop script already ran, 
-        // but it's safe to run again to ensure consistent state.
+    const colorPicker = document.getElementById('custom-primary-picker');
+    if (storedCustomHex && colorPicker) {
+        colorPicker.value = storedCustomHex;
         updateCustomColor(storedCustomHex);
     }
 
-    if (mobilePicker) {
-        mobilePicker.addEventListener('input', (e) => {
+    if (colorPicker) {
+        colorPicker.addEventListener('input', (e) => {
             updateCustomColor(e.target.value);
         });
     }
     
-    // Reset Logic (Mobile)
-    const mobileResetButton = document.getElementById('mobile-reset-custom-theme');
-    if (mobileResetButton) {
-        mobileResetButton.addEventListener('click', () => {
+    // Reset Logic
+    const resetButton = document.getElementById('reset-custom-theme');
+    if (resetButton) {
+        resetButton.addEventListener('click', () => {
             document.documentElement.style.removeProperty('--p');
             document.documentElement.style.removeProperty('--s');
             document.documentElement.style.removeProperty('--a');
             localStorage.removeItem('custom-primary-hex');
-            
-            // Sync UI
-             const desktopPicker = document.getElementById('custom-primary-picker');
-            if (desktopPicker) desktopPicker.value = '#000000'; // formatting issues
-            if (mobilePicker) mobilePicker.value = '#000000';
         });
     }
 
     // Dark/Light Toggle Logic
-    const mobileThemeToggle = document.getElementById("mobile-theme-toggle");
+    const desktopThemeToggle = document.getElementById("desktop-theme-toggle");
     
-    const updateMobileThemeIcons = (theme) => {
+    const updateDesktopThemeIcons = (theme) => {
+      // ... same as before
       const isDark = isDarkTheme(theme);
       
       // Update attribute
       document.documentElement.setAttribute('data-theme-type', isDark ? 'dark' : 'light');
 
-      if (!mobileThemeToggle) return;
-      const lightIcon = mobileThemeToggle.querySelector(".light-icon");
-      const darkIcon = mobileThemeToggle.querySelector(".dark-icon");
+      if (!desktopThemeToggle) return;
+      const lightIcon = desktopThemeToggle.querySelector(".light-icon");
+      const darkIcon = desktopThemeToggle.querySelector(".dark-icon");
       
       if (lightIcon && darkIcon) {
         if (isDark) {
@@ -403,37 +401,29 @@ const themes = [
 
     // Initialize icon state
     const currentTheme = document.documentElement.getAttribute("data-theme") || localStorage.getItem("theme");
-    updateMobileThemeIcons(currentTheme);
+    updateDesktopThemeIcons(currentTheme);
 
-    if (mobileThemeToggle) {
-      mobileThemeToggle.addEventListener("click", () => {
+    if (desktopThemeToggle) {
+      desktopThemeToggle.addEventListener("click", () => {
         const currentTheme = document.documentElement.getAttribute("data-theme");
         const newTheme = currentTheme === SITE_THEME.light ? SITE_THEME.dark : SITE_THEME.light;
         
         document.documentElement.setAttribute("data-theme", newTheme);
         localStorage.setItem("theme", newTheme);
         
-        updateMobileThemeIcons(newTheme);
-        
-        // Sync with other toggles if any
-        const allToggles = document.querySelectorAll("[data-theme-toggle]");
-        allToggles.forEach((toggle) => {
-           // Assuming other toggles have similar structure or logic, 
-           // but since we are in mobile settings, we might be the only one active or visible.
-           // If needed, dispatch a custom event or manually update them.
-           // For now, just updating the DOM attribute is enough for styles, 
-           // but icons on other toggles might need refresh if they are visible.
-        });
+        updateDesktopThemeIcons(newTheme);
       });
     }
-
-    // Banner Mode Logic
-    const bannerButtons = document.querySelectorAll("[data-set-banner-mobile]");
     
+    // ... Banner Mode (same) ...
+    // Banner Mode Logic
+    const bannerButtons = document.querySelectorAll("[data-set-banner-desktop]");
+    
+    // ...
     const updateActiveBannerButton = () => {
       const currentMode = document.documentElement.getAttribute("data-banner-mode") || localStorage.getItem("banner-mode") || "normal";
       bannerButtons.forEach(btn => {
-        if (btn.getAttribute("data-set-banner-mobile") === currentMode) {
+        if (btn.getAttribute("data-set-banner-desktop") === currentMode) {
           btn.classList.add("bg-primary/10", "text-primary", "font-bold", "active");
         } else {
           btn.classList.remove("bg-primary/10", "text-primary", "font-bold", "active");
@@ -445,7 +435,7 @@ const themes = [
 
     bannerButtons.forEach(btn => {
       btn.addEventListener("click", () => {
-        const mode = btn.getAttribute("data-set-banner-mobile");
+        const mode = btn.getAttribute("data-set-banner-desktop");
         document.documentElement.setAttribute("data-banner-mode", mode);
         localStorage.setItem("banner-mode", mode);
         updateActiveBannerButton();
@@ -453,12 +443,12 @@ const themes = [
     });
 
     // Theme Selector Logic
-    const themeButtons = document.querySelectorAll('[data-set-theme-mobile]');
+    const themeButtons = document.querySelectorAll('[data-set-theme-desktop]');
 
     const updateActiveThemeButton = () => {
       const currentTheme = document.documentElement.getAttribute("data-theme") || localStorage.getItem("theme");
       themeButtons.forEach(btn => {
-        if (btn.getAttribute('data-set-theme-mobile') === currentTheme) {
+        if (btn.getAttribute('data-set-theme-desktop') === currentTheme) {
             btn.classList.add("bg-primary/10", "text-primary", "font-bold", "active");
         } else {
             btn.classList.remove("bg-primary/10", "text-primary", "font-bold", "active");
@@ -470,17 +460,18 @@ const themes = [
     
     themeButtons.forEach(btn => {
       btn.addEventListener('click', () => {
-        const theme = btn.getAttribute('data-set-theme-mobile');
-        document.documentElement.setAttribute('data-theme', theme);
+        const theme = btn.getAttribute('data-set-theme-desktop');
+        document.documentElement.setAttribute("data-theme", theme);
         localStorage.setItem('theme', theme);
         
-        // Remove Custom Color
+        // Remove Custom Color when switching theme?
         document.documentElement.style.removeProperty('--p');
         document.documentElement.style.removeProperty('--s');
         document.documentElement.style.removeProperty('--a');
         localStorage.removeItem('custom-primary-hex');
+        // Reset picker value if possible?
         
-        updateMobileThemeIcons(theme);
+        updateDesktopThemeIcons(theme);
         updateActiveThemeButton();
       });
     });
@@ -492,7 +483,7 @@ const themes = [
           if (mutation.attributeName === 'data-theme') {
              updateActiveThemeButton();
              const currentTheme = document.documentElement.getAttribute("data-theme");
-             updateMobileThemeIcons(currentTheme);
+             updateDesktopThemeIcons(currentTheme);
           }
           if (mutation.attributeName === 'data-banner-mode') {
              updateActiveBannerButton();
