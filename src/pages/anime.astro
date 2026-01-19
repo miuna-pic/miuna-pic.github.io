@@ -512,6 +512,8 @@ const averageRating = ratedItems.length > 0
       const allCards = Array.from(grid.getElementsByClassName('anime-card')) as HTMLElement[];
 
       function filterAndSort() {
+        if (!grid) return;
+
         const searchTerm = searchInput.value.toLowerCase();
         const typeValue = currentTypeValue;
         const sortValue = currentSortValue;
