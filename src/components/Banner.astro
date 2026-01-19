@@ -20,6 +20,8 @@ if (currentPath === "/") {
   !currentPath.includes("/blog/category/")
 ) {
   pageKey = "home"; // 博客详情页也用 home 配置
+} else if (currentPath.startsWith("/navigation/") || currentPath === "/navigation") {
+  pageKey = "navigation";
 } else {
   // 其它页面如 /anime、/friend、/project、/navigation 等
   pageKey = currentPath.replace(/^\//, "");

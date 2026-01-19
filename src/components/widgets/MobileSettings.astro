@@ -35,11 +35,11 @@ const themes = [
 ];
 ---
 
-<div class="dropdown dropdown-end">
-  <div tabindex="0" role="button" class="btn btn-ghost btn-circle btn-sm hover:bg-transparent text-primary" title="Settings">
+<details class="dropdown dropdown-end" id="mobile-settings-details">
+  <summary class="btn btn-ghost btn-circle btn-sm hover:bg-transparent text-primary" title="Settings">
     <Icon name="material-symbols:settings-outline" class="w-6 h-6" />
-  </div>
-  <ul tabindex="0" class="dropdown-content z-[100] menu p-2 shadow-2xl bg-base-200 rounded-box w-64 mt-4">
+  </summary>
+  <ul class="dropdown-content z-[100] menu p-2 shadow-2xl bg-base-200 rounded-box w-64 mt-4">
     <!-- Dark/Light Toggle -->
     <li>
       <button id="mobile-theme-toggle" class="flex justify-between items-center gap-2 p-2 hover:bg-base-300 rounded-lg w-full">
@@ -191,11 +191,12 @@ const themes = [
             <span id="mobile-network-isp" class="text-xs font-mono truncate max-w-[150px]">...</span>
           </div>
           <div class="flex justify-between items-center px-1">
-          <div class="flex justify-between items-center px-1">
+
             <span class="text-xs opacity-70">NAT</span>
-            <span id="mobile-network-nat" class="text-xs font-mono">...</span>
+            <span id="mobile-network-nat" class="text-xs font-mono truncate max-w-[150px]">...</span>
           </div>
           <button id="mobile-refresh-network-status" class="btn btn-sm btn-outline w-full mt-2">Refresh</button>
+
         </div>
       </details>
     </li>
@@ -224,8 +225,31 @@ const themes = [
         </div>
       </details>
     </li>
+
+    <!-- Anime Trace Tool -->
+    <li>
+      <details>
+        <summary class="font-medium flex justify-between items-center p-2 hover:bg-base-300 rounded-lg w-full">
+          <div class="flex items-center gap-2">
+            <Icon name="material-symbols:image-search" class="w-5 h-5" />
+            Anime Trace
+          </div>
+        </summary>
+        <div class="p-2 bg-base-100 rounded-box flex flex-col gap-2" onclick="event.stopPropagation()">
+           <input type="file" id="mobile-animetrace-file" accept="image/*" class="file-input file-input-bordered file-input-sm w-full" />
+           <select id="mobile-animetrace-model" class="select select-bordered select-sm w-full">
+             <option value="animetrace_high_beta" selected>High Quality (Beta)</option>
+             <option value="pre_stable">Anime</option>
+             <option value="anime_model_lovelive">LoveLive (Legacy)</option>
+             <option value="full_game_model_kira">GalGame (Legacy)</option>
+           </select>
+           <button id="mobile-animetrace-btn" class="btn btn-sm btn-primary w-full">Search</button>
+           <div id="mobile-animetrace-result" class="text-xs font-mono bg-base-200 p-2 rounded max-h-40 overflow-y-auto hidden whitespace-pre-wrap"></div>
+        </div>
+      </details>
+    </li>
   </ul>
-</div>
+</details>
 
 <script is:inline define:vars={{ SITE_THEME }}>
   document.addEventListener("astro:page-load", () => {
@@ -298,13 +322,20 @@ const themes = [
         if (natEl) natEl.textContent = '...';
 
         // Check Ping
-        const start = performance.now();
+        // Check Ping (Best of 3)
         try {
-            await fetch(window.location.href, { method: 'HEAD', cache: 'no-store' });
-            const duration = Math.round(performance.now() - start);
-            pingEl.textContent = `${duration} ms`;
-            if (duration < 200) pingEl.classList.add('text-success');
-            else if (duration < 500) pingEl.classList.add('text-warning');
+            let minDuration = Infinity;
+            for (let i = 0; i < 3; i++) {
+                const start = performance.now();
+                await fetch(window.location.href, { method: 'HEAD', cache: 'no-store' });
+                const duration = performance.now() - start;
+                if (duration < minDuration) minDuration = duration;
+            }
+            minDuration = Math.round(minDuration);
+            
+            pingEl.textContent = `${minDuration} ms`;
+            if (minDuration < 200) pingEl.classList.add('text-success');
+            else if (minDuration < 500) pingEl.classList.add('text-warning');
             else pingEl.classList.add('text-error');
         } catch (e) {
             pingEl.textContent = 'Err';
@@ -336,7 +367,7 @@ const themes = [
 
         // Check NAT Type (WebRTC)
         if (natEl) {
-            natEl.textContent = '检测中...';
+            natEl.textContent = 'Detecting...';
             natEl.className = 'text-xs font-mono';
             
             const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.chat.bilibili.com:3478' }] });
@@ -350,7 +381,7 @@ const themes = [
                     
                     // Check NAT0 (Public IP) - if valid public IP matches local host candidate
                     if (c.type === 'host' && c.address === publicIpRef && publicIpRef !== 'Switching to fallback...' && publicIpRef !== 'Unknown') {
-                         natEl.textContent = 'NAT0 (公网IP)';
+                         natEl.textContent = 'Public IP';
                          natEl.classList.add('text-success');
                          pc.close();
                          return;
@@ -358,16 +389,16 @@ const themes = [
                     
                     if (c.type === 'srflx') {
                          // Found a reflex candidate -> Behind NAT
-                         natEl.textContent = 'NAT1-3 (非公网)';
+                         natEl.textContent = 'Restricted';
                          natEl.classList.remove('text-success');
                     }
                 } else {
                     if (candidatesCount === 0) {
-                         natEl.textContent = 'NAT4 (连接受限)';
+                         natEl.textContent = 'Symmetric';
                          natEl.classList.add('text-error');
                     } else if (natEl.textContent === '检测中...') {
                          // Fallback if we got candidates (e.g. host) but no srflx and no match
-                         natEl.textContent = 'NAT4 (连接受限)'; 
+                         natEl.textContent = 'Symmetric'; 
                     }
                     pc.close();
                 }
@@ -378,7 +409,7 @@ const themes = [
                 const offer = await pc.createOffer();
                 await pc.setLocalDescription(offer);
             } catch (e) {
-                natEl.textContent = '检测失败';
+                natEl.textContent = 'Failed';
             }
         }
     };
@@ -386,9 +417,8 @@ const themes = [
     const mobileRefreshBtn = document.getElementById('mobile-refresh-network-status');
     if (mobileRefreshBtn) {
         mobileRefreshBtn.addEventListener('click', checkMobileNetworkStatus);
-        // Initial check
-        checkMobileNetworkStatus();
     }
+    checkMobileNetworkStatus();
 
     // Color conversion helper (Hex to OKLCH)
     function hexToRgb(hex) {
@@ -607,6 +637,16 @@ const themes = [
       });
     });
 
+    // Mobile Settings Click Outside
+    const mDetails = document.getElementById('mobile-settings-details');
+    if (mDetails) {
+        document.addEventListener('click', (e) => {
+            if (mDetails.hasAttribute('open') && !mDetails.contains(e.target)) {
+                mDetails.removeAttribute('open');
+            }
+        });
+    }
+
     // Theme Selector Logic
     const themeButtons = document.querySelectorAll('[data-set-theme-mobile]');
 
@@ -655,6 +695,77 @@ const themes = [
         }
       });
     });
+
+    // Anime Trace Logic (Mobile)
+    const mTraceBtn = document.getElementById('mobile-animetrace-btn');
+    const mTraceFile = document.getElementById('mobile-animetrace-file');
+    const mTraceModel = document.getElementById('mobile-animetrace-model');
+    const mTraceResult = document.getElementById('mobile-animetrace-result');
+
+    if (mTraceBtn && mTraceFile) {
+        mTraceBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const file = mTraceFile.files[0];
+            if (!file) {
+                alert('Please select an image first');
+                return;
+            }
+
+            mTraceBtn.disabled = true;
+            mTraceBtn.textContent = 'Searching...';
+            mTraceResult.classList.remove('hidden');
+            mTraceResult.textContent = 'Processing...';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('model', mTraceModel.value);
+                formData.append('is_multi', '1');
+                formData.append('ai_detect', '0');
+
+                const response = await fetch('https://api.animetrace.com/v1/search', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                let output = '';
+                
+                // 1. AI Status
+                if (typeof data.ai !== 'undefined') {
+                     output += `AI Generated: ${data.ai ? 'Yes' : 'No'}\n\n`;
+                }
+
+                // 2. Data loop
+                if (data.data && Array.isArray(data.data)) {
+                    data.data.forEach((item, index) => {
+                         // API uses 'character' as the key for the list of matches
+                         if (item.character && Array.isArray(item.character)) {
+                             item.character.forEach(c => {
+                                 output += `Work: ${c.work || 'Unknown'}\n`;
+                                 output += `Character: ${c.character || 'Unknown'}\n\n`;
+                             });
+                         }
+                    });
+                }
+
+                if (!output.trim()) {
+                     output = 'No recognized data found.';
+                }
+                
+                mTraceResult.textContent = output;
+                console.log('Mobile AnimeTrace Data:', data);
+
+            } catch (e) {
+                mTraceResult.textContent = 'Error: ' + e.message;
+            } finally {
+                mTraceBtn.disabled = false;
+                mTraceBtn.textContent = 'Search';
+            }
+        });
+    }
 
     observer.observe(document.documentElement, {
       attributes: true,
