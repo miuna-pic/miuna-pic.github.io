@@ -805,27 +805,45 @@ const initialSong = musicList[0] || {};
     if (!window.globalMusicPlayer) {
         window.globalMusicPlayer = new GlobalMusicPlayer();
     } else {
-        // HMR Support: When file changes, we need to update the methods of the existing instance
-        // or replace the instance while preserving state.
-        const oldInstance = window.globalMusicPlayer;
-        const newInstance = new GlobalMusicPlayer();
-        
-        // Preserve State
-        newInstance.playlist = oldInstance.playlist;
-        newInstance.currentIndex = oldInstance.currentIndex;
-        newInstance.isPlaying = oldInstance.isPlaying;
-        newInstance.isShuffle = oldInstance.isShuffle;
-        newInstance.repeatMode = oldInstance.repeatMode;
-        newInstance.lyrics = oldInstance.lyrics;
-        newInstance.lrcUrl = oldInstance.lrcUrl;
-        newInstance.audio = oldInstance.audio;
-        newInstance.isMiniOpen = oldInstance.isMiniOpen;
-        
-        // cleanup old events/timers if necessary
-        if(oldInstance.closeTimer) clearTimeout(oldInstance.closeTimer);
-        
-        // Replace
-        window.globalMusicPlayer = newInstance;
-        window.globalMusicPlayer.handlePageLoad();
+        // HMR - Re-init logic
+         const oldInstance = window.globalMusicPlayer;
+         const newInstance = new GlobalMusicPlayer();
+         
+         // Transfer state
+         newInstance.playlist = oldInstance.playlist;
+         newInstance.currentIndex = oldInstance.currentIndex;
+         newInstance.isPlaying = oldInstance.isPlaying;
+         newInstance.isShuffle = oldInstance.isShuffle;
+         newInstance.repeatMode = oldInstance.repeatMode;
+         newInstance.lyrics = oldInstance.lyrics;
+         newInstance.lrcUrl = oldInstance.lrcUrl;
+         newInstance.audio = oldInstance.audio;
+         newInstance.isMiniOpen = oldInstance.isMiniOpen;
+         
+         if(oldInstance.closeTimer) clearTimeout(oldInstance.closeTimer);
+         
+         window.globalMusicPlayer = newInstance;
+         window.globalMusicPlayer.handlePageLoad();
     }
 </script>
+
+<style is:global>
+    /* Force White Acrylic for Mini Player when Site Theme is Light */
+    [data-theme-type="light"] #mini-player-card,
+    [data-theme-type="light"] #mini-fab {
+        background-color: rgba(255, 255, 255, 0.8) !important;
+        backdrop-filter: blur(12px) !important;
+        border-color: rgba(255, 255, 255, 0.3) !important;
+    }
+    
+    /* Ensure text is dark in light mode acrylic */
+    [data-theme-type="light"] #mini-title,
+    [data-theme-type="light"] #mini-fab {
+        color: #000000 !important;
+    }
+    [data-theme-type="light"] #mini-artist,
+    [data-theme-type="light"] #mini-prev,
+    [data-theme-type="light"] #mini-next {
+         color: rgba(0,0,0,0.6) !important;
+    }
+</style>
