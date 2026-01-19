@@ -693,7 +693,13 @@ const themes = [
         localStorage.removeItem('custom-primary-hex');
         
         updateMobileThemeIcons(theme);
-            document.documentElement.style.setProperty('--s', oklchVal);
+      });
+    });
+
+    // Observer for external changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes') {
           if (mutation.attributeName === 'data-theme') {
              updateActiveThemeButton();
              const currentTheme = document.documentElement.getAttribute("data-theme");
