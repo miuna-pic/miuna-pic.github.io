@@ -6,7 +6,7 @@ site:
   favicon: /favicon.ico
   theme:
     light: garden
-    dark: synthwave
+    dark: dracula
     code: github-dark
   date_format: ddd MMM DD YYYY
   blog:
