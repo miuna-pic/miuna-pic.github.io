@@ -64,7 +64,7 @@
                 "description": "奶昔论坛，Eism、美卡交流平台",
                 "url": "https://forum.naixi.net",
                 "category": "BBS",
-                "id": "806b2bee-0e6d-4755-94c5-020b0dd7f342",
+                "id": "NaiXi",
                 "badgeIcon": "lucide:at-sign",
                 "badge": "奶友"
             },
@@ -76,7 +76,7 @@
                 "category": "BBS",
                 "id": "Kadys",
                 "badgeIcon": "lucide:at-sign",
-                "badge": "Kadys"
+                "badge": "ACGN"
             },
             {
                 "name": "Project1",
@@ -85,7 +85,47 @@
                 "url": "https://rpg.blue",
                 "category": "BBS",
                 "id": "Project1",
-                "badge": "Project1",
+                "badge": "RPG",
+                "badgeIcon": "lucide:at-sign"
+            },
+            {
+                "name": "恩山无线论坛",
+                "avatar": "https://pic.000.moe/pic/696d98e731a28.ico",
+                "description": "无线设备硬件软件交流平台、固件分享平台",
+                "url": "https://www.right.com.cn",
+                "category": "BBS",
+                "id": "Right",
+                "badge": "路由固件",
+                "badgeIcon": "lucide:at-sign"
+            },
+            {
+                "name": "绯月ScarletMoon",
+                "avatar": "https://pic.000.moe/pic/696d99b122f06.ico",
+                "description": "绯月是一个以动漫、游戏、音乐、绘画等为主题的论坛.",
+                "url": "https://bbs.kfpromax.com",
+                "category": "BBS",
+                "id": "KfProMax",
+                "badge": "Galgame",
+                "badgeIcon": "lucide:at-sign"
+            },
+            {
+                "name": "V2EX",
+                "avatar": "https://pic.000.moe/pic/696d9a13462fa.png",
+                "description": "V2EX - 创意工作者们的社区",
+                "url": "https://www.v2ex.com",
+                "category": "BBS",
+                "id": "V2ex",
+                "badge": "V2ex",
+                "badgeIcon": "lucide:at-sign"
+            },
+            {
+                "name": "Komica",
+                "avatar": "https://pic.000.moe/pic/696d9a64966f1.ico",
+                "description": "ACGN相关为主题的仿2ch风格的匿名留言板",
+                "url": "https://komica1.org",
+                "category": "BBS",
+                "id": "Komica",
+                "badge": "Komica",
                 "badgeIcon": "lucide:at-sign"
             }
         ]
