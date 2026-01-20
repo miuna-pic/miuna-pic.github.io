@@ -82,4 +82,17 @@ AxisNow提供了一键安装脚本，依次点击边缘 - 新增 - 生成并复�
 
 以上就是利用AxisNow + Cloudflare实现国内自建CDN分流，网络上有很多Cloudflare Saas教程，我这篇更面向小白，写的很详细，因为我该一开始看文档也看蒙了，其实能分清代理域，虚拟域，回源域，调度域就应该全部理解了<br>
 
+## 关闭CF IPV6(可选)
+如果你的边缘节点只有IPV4，当用户使用IPV6国内网络访问时会分流到Cloudflare，所以我们需要关闭IPV6兼容性
+
+```sh
+curl https://api.cloudflare.com/client/v4/zones/${区域 ID}/settings/ipv6 \
+    -X PATCH \
+    -H 'Content-Type: application/json' \
+    -H "X-Auth-Email: ${登录邮箱}" \
+    -H "X-Auth-Key: ${API 密匙}" \
+    -d '{"value": "off"}'
+```
+注意:API密匙为Global API KEY
+
 ***最后，Engoy it!***
