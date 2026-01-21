@@ -240,7 +240,57 @@
                 "url": "https://ani.gamer.com.tw",
                 "category": "ACGN",
                 "id": "anigamer",
-                "badge": "动画疯",
+                "badge": "新番",
+                "badgeIcon": "lucide:flower"
+            },
+            {
+                "name": "2DFan",
+                "avatar": "https://pic.000.moe/pic/6970afefb2436.ico",
+                "description": "2DFan(二次元爱好者)是一个专注于提供日本游戏、动漫相关内容的门户站点.",
+                "url": "https://2dfan.com",
+                "category": "ACGN",
+                "id": "2DFan",
+                "badge": "补丁",
+                "badgeIcon": "lucide:flower"
+            },
+            {
+                "name": "ASMR Online",
+                "avatar": "https://pic.000.moe/pic/6970b0505d7a9.png",
+                "description": "ASMR Online，在线ASMR播放, 同人音声在线播放",
+                "url": "https://asmr-300.com",
+                "category": "ACGN",
+                "id": "ASMR",
+                "badgeIcon": "lucide:flower",
+                "badge": "ASMR"
+            },
+            {
+                "name": "喵御宅",
+                "avatar": "https://pic.000.moe/pic/6970b08f1245a.ico",
+                "description": "喵御宅官网，喵御宅Mfuns是一个以动漫、游戏、音乐、舞蹈等为主题的多元内容平台，提供各种原创和转载的视频、图片、文字等内容",
+                "url": "https://www.mfuns.net",
+                "category": "ACGN",
+                "id": "mfuns",
+                "badge": "泛二次元",
+                "badgeIcon": "lucide:flower"
+            },
+            {
+                "name": "梓澪の妙妙屋",
+                "avatar": "https://pic.000.moe/pic/6970b11f9edb1.webp",
+                "description": "ACGN网盘",
+                "url": "https://zi0.cc",
+                "category": "ACGN",
+                "id": "zi0",
+                "badge": "网盘",
+                "badgeIcon": "lucide:flower"
+            },
+            {
+                "name": "月幕Galgame",
+                "avatar": "https://pic.000.moe/pic/6970b18685bb3.ico",
+                "description": "月幕Galgame, 小圈子内最新消息通道, Gal资讯、Gal专栏、Gal评测、业界要闻应有尽有, 收录全网各站最新资源、特殊码，一个专属于Galgame玩家的驿站！",
+                "url": "https://www.ymgal.games",
+                "category": "ACGN",
+                "id": "ymgal",
+                "badge": "资讯",
                 "badgeIcon": "lucide:flower"
             }
         ]
