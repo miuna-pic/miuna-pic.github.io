@@ -143,7 +143,7 @@
                 "id": "Bangumi",
                 "badge": "番组计划",
                 "badgeIcon": "lucide:flower",
-                "badgeColor": "success"
+                "badgeColor": ""
             },
             {
                 "name": "萌娘百科",
@@ -153,7 +153,7 @@
                 "category": "ACGN",
                 "id": "Moegirl",
                 "badgeIcon": "lucide:flower",
-                "badgeColor": "success",
+                "badgeColor": "",
                 "badge": "萌百"
             },
             {
@@ -163,7 +163,7 @@
                 "url": "https://www.pixiv.net",
                 "category": "ACGN",
                 "id": "Pixiv",
-                "badgeColor": "success",
+                "badgeColor": "",
                 "badge": "插画",
                 "badgeIcon": "lucide:flower"
             },
@@ -176,7 +176,7 @@
                 "id": "E-Hentai",
                 "badge": "本子",
                 "badgeIcon": "lucide:flower",
-                "badgeColor": "success"
+                "badgeColor": ""
             },
             {
                 "name": "DLsite",
@@ -186,7 +186,7 @@
                 "category": "ACGN",
                 "id": "DLsite",
                 "badge": "同人",
-                "badgeColor": "success",
+                "badgeColor": "",
                 "badgeIcon": "lucide:flower"
             },
             {
@@ -198,7 +198,7 @@
                 "id": "ACGBox",
                 "badge": "导航",
                 "badgeIcon": "lucide:flower",
-                "badgeColor": "success"
+                "badgeColor": ""
             },
             {
                 "name": "轻书架",
@@ -209,7 +209,7 @@
                 "id": "lightnovel",
                 "badge": "轻小说",
                 "badgeIcon": "lucide:flower",
-                "badgeColor": "success"
+                "badgeColor": ""
             },
             {
                 "name": "VCB Studio",
@@ -220,7 +220,7 @@
                 "id": "vcb-s",
                 "badge": "压制组",
                 "badgeIcon": "lucide:flower",
-                "badgeColor": "success"
+                "badgeColor": ""
             },
             {
                 "name": "長門有C",
@@ -231,7 +231,17 @@
                 "id": "yuc",
                 "badge": "新番导视",
                 "badgeIcon": "lucide:flower",
-                "badgeColor": "success"
+                "badgeColor": ""
+            },
+            {
+                "name": "动画疯",
+                "avatar": "https://pic.000.moe/pic/6970992e868c0.jpg",
+                "description": "動畫瘋是由巴哈姆特所推出，正版授權的免費動畫平台，提供與日本同步的當季新番動畫，並含有高達上萬集的過往名作，供動畫迷們自由選擇！",
+                "url": "https://ani.gamer.com.tw",
+                "category": "ACGN",
+                "id": "anigamer",
+                "badge": "动画疯",
+                "badgeIcon": "lucide:flower"
             }
         ]
     }
