@@ -1,7 +1,7 @@
 [
     {
         "title": "BBS",
-        "icon": "lucide:folder",
+        "icon": "lucide:at-sign",
         "items": [
             {
                 "name": "NodeSeek",
@@ -127,6 +127,111 @@
                 "id": "Komica",
                 "badge": "Komica",
                 "badgeIcon": "lucide:at-sign"
+            }
+        ]
+    },
+    {
+        "title": "ACGN",
+        "icon": "lucide:flower",
+        "items": [
+            {
+                "name": "Bangumi",
+                "avatar": "https://pic.000.moe/pic/697090ba9902a.png",
+                "description": "专注于动漫、音乐、游戏领域，帮助你分享、发现与结识同好的ACG网络.",
+                "url": "https://bangumi.tv",
+                "category": "ACGN",
+                "id": "Bangumi",
+                "badge": "番组计划",
+                "badgeIcon": "lucide:flower",
+                "badgeColor": "success"
+            },
+            {
+                "name": "萌娘百科",
+                "avatar": "https://pic.000.moe/pic/6970920d9086c.png",
+                "description": "萌娘百科，万物皆可萌的百科全书！",
+                "url": "https://zh.moegirl.org.cn",
+                "category": "ACGN",
+                "id": "Moegirl",
+                "badgeIcon": "lucide:flower",
+                "badgeColor": "success",
+                "badge": "萌百"
+            },
+            {
+                "name": "Pixiv",
+                "avatar": "https://pic.000.moe/pic/697092667fce6.png",
+                "description": "pixiv(ピクシブ)は、イラスト・マンガ・小説の投稿や閲覧が楽しめる国内最大級の作品コミュニケーションサービスです",
+                "url": "https://www.pixiv.net",
+                "category": "ACGN",
+                "id": "Pixiv",
+                "badgeColor": "success",
+                "badge": "插画",
+                "badgeIcon": "lucide:flower"
+            },
+            {
+                "name": "E-Hentai",
+                "avatar": "https://pic.000.moe/pic/6970933ede000.ico",
+                "description": "With more than a million absolutely free hentai doujinshi, manga, cosplay and CG galleries, E-Hentai Galleries is the world's largest free Hentai",
+                "url": "https://e-hentai.org",
+                "category": "ACGN",
+                "id": "E-Hentai",
+                "badge": "本子",
+                "badgeIcon": "lucide:flower",
+                "badgeColor": "success"
+            },
+            {
+                "name": "DLsite",
+                "avatar": "https://pic.000.moe/pic/697093b749427.png",
+                "description": "「DLsite 同人」は同人誌・同人ゲーム・同人ボイス・ASMRのダウンロードショップ",
+                "url": "https://www.dlsite.com",
+                "category": "ACGN",
+                "id": "DLsite",
+                "badge": "同人",
+                "badgeColor": "success",
+                "badgeIcon": "lucide:flower"
+            },
+            {
+                "name": "ACGBox",
+                "avatar": "https://pic.000.moe/pic/6970941130557.png",
+                "description": "ACG盒子，ACG二次元导航网站，收录ACG二次元相关的网站，打造一个ACG二次元专属的网站。",
+                "url": "https://www.acgbox.link",
+                "category": "ACGN",
+                "id": "ACGBox",
+                "badge": "导航",
+                "badgeIcon": "lucide:flower",
+                "badgeColor": "success"
+            },
+            {
+                "name": "轻书架",
+                "avatar": "https://pic.000.moe/pic/697094b1a4346.png",
+                "description": "轻书架，国内一手的轻小说发布地，致力于提供最完美的网站使用体验。",
+                "url": "https://www.lightnovel.app",
+                "category": "ACGN",
+                "id": "lightnovel",
+                "badge": "轻小说",
+                "badgeIcon": "lucide:flower",
+                "badgeColor": "success"
+            },
+            {
+                "name": "VCB Studio",
+                "avatar": "https://pic.000.moe/pic/6970954d46ddc.png",
+                "description": "国内知名动漫压制组",
+                "url": "https://vcb-s.com",
+                "category": "ACGN",
+                "id": "vcb-s",
+                "badge": "压制组",
+                "badgeIcon": "lucide:flower",
+                "badgeColor": "success"
+            },
+            {
+                "name": "長門有C",
+                "avatar": "https://pic.000.moe/pic/6970964639a57.png",
+                "description": "有C的新番导视，泛式狂喜",
+                "url": "https://yuc.wiki",
+                "category": "ACGN",
+                "id": "yuc",
+                "badge": "新番导视",
+                "badgeIcon": "lucide:flower",
+                "badgeColor": "success"
             }
         ]
     }
