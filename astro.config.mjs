@@ -21,10 +21,18 @@ export default defineConfig({
     envPrefix: ['PUBLIC_', 'NEXT_PUBLIC_'],
     define: {
       'import.meta.env.YAML_GITHUB_CONFIG': JSON.stringify(GITHUB_CONFIG || null)
-    }
+    },
+    css: {
+      preprocessorOptions: {
+        scss: {
+          api: "modern-compiler",
+        },
+      },
+    },
   },
   site: USER_SITE,
   output: "static",
+  prefetch: true,
   style: {
     scss: {
       includePaths: ["./src/styles"],
@@ -43,7 +51,47 @@ export default defineConfig({
     tailwind({
       configFile: "./tailwind.config.mjs",
     }),
-    playformCompress(),
+    playformCompress({
+      HTML: {
+        "html-minifier-terser": {
+          removeAttributeQuotes: false,
+        },
+      },
+      CSS: true,
+      JavaScript: true,
+      Image: {
+        svg: {
+          multipass: true,
+          plugins: [
+            {
+              name: 'preset-default',
+              params: {
+                overrides: {
+                  removeViewBox: false,
+                },
+              },
+            },
+          ],
+        },
+        webp: {
+          quality: 80,
+        },
+        avif: {
+          quality: 80,
+        },
+        png: {
+          quality: 80,
+          compressionLevel: 8,
+        },
+        jpeg: {
+          quality: 80,
+          mozjpeg: true,
+        },
+        gif: {
+          optimizationLevel: 3,
+        },
+      },
+    }),
   ],
   markdown: {
     shikiConfig: {
@@ -220,13 +268,5 @@ export default defineConfig({
       },
     ]],
   },
-  vite: {
-    css: {
-      preprocessorOptions: {
-        scss: {
-          api: "modern-compiler",
-        },
-      },
-    },
-  },
+
 });

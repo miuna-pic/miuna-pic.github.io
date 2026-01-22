@@ -20,7 +20,11 @@ function handle422Error(): void {
 }
 
 export function toBase64Utf8(input: string): string {
-	return btoa(unescape(encodeURIComponent(input)))
+	return btoa(
+		new TextEncoder()
+			.encode(input)
+			.reduce((data, byte) => data + String.fromCharCode(byte), '')
+	)
 }
 
 export function signAppJwt(appId: string, privateKeyPem: string): string {
@@ -205,7 +209,9 @@ export async function readTextFileFromRepo(token: string | null | undefined, own
 	const data: any = await res.json()
 	if (Array.isArray(data) || !data.content) return null
 	try {
-		return decodeURIComponent(escape(atob(data.content)))
+		const binString = atob(data.content)
+		const bytes = Uint8Array.from(binString, c => c.charCodeAt(0))
+		return new TextDecoder().decode(bytes)
 	} catch {
 		return atob(data.content)
 	}

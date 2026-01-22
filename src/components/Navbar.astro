@@ -1,6 +1,5 @@
 ---      
 import { Icon } from "astro-icon/components";      
-import ThemeToggle from "./widgets/ThemeToggle.astro";      
 import SettingsMenu from "./widgets/SettingsMenu.astro";
 import MobileSettings from "./widgets/MobileSettings.astro";
 import { SITE_TITLE, SITE_MENU, USER_AVATAR } from "../config";      
@@ -163,13 +162,10 @@ const typedMenu = SITE_MENU as MenuItem[];
     let lastScrollY = window.scrollY;
     const navbarDesktop = document.getElementById("navbar-desktop");
     const navbarMobile = document.getElementById("navbar-mobile");
-    const navbarBg = document.getElementById("navbar-bg");
-    const navItems = document.querySelectorAll(".nav-item");
 
     function handleScroll() {
       const currentScrollY = window.scrollY;
       const isScrollingDown = currentScrollY > lastScrollY && currentScrollY > 50;
-      const isScrolledPastBanner = currentScrollY > 100; // 假设 Banner 高度至少 100px，或者根据实际情况调整
 
       // 桌面端处理
       if (navbarDesktop) {

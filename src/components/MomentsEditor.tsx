@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { toast, Toaster } from 'sonner';
 import { Loader2, Image as ImageIcon, Send, X } from 'lucide-react';
-import { putFile, getFileSha, readTextFileFromRepo, toBase64Utf8 } from '@/lib/github-client';
+import { putFile, readTextFileFromRepo, toBase64Utf8 } from '@/lib/github-client';
 import { readFileAsText } from '@/lib/file-utils';
 import { useAuthStore } from '@/components/write/hooks/use-auth';
 import { GITHUB_CONFIG } from '@/consts';
@@ -21,7 +21,7 @@ export default function MomentsEditor() {
     const [content, setContent] = useState('');
     const [files, setFiles] = useState<File[]>([]);
     const [loading, setLoading] = useState(false);
-    const [status, setStatus] = useState('');
+    const [, setStatus] = useState('');
 
     const keyInputRef = useRef<HTMLInputElement>(null);
 

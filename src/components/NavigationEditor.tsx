@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { toast, Toaster } from 'sonner';
-import { Loader2, Plus, GripVertical, Trash2, X, AlertCircle } from 'lucide-react';
+import { Loader2, Plus, GripVertical, Trash2, X } from 'lucide-react';
 import { putFile, readTextFileFromRepo, toBase64Utf8 } from '@/lib/github-client';
 import { useAuthStore } from '@/components/write/hooks/use-auth';
 import { GITHUB_CONFIG } from '@/consts';

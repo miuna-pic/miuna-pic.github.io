@@ -6,7 +6,7 @@ import { useRef } from 'react'
 const defaultText = 'text'
 
 export function WriteEditor() {
-	const { form, updateForm, images, addFiles } = useWriteStore()
+	const { form, updateForm, addFiles } = useWriteStore()
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
 
 	const insertText = (text: string) => {
@@ -15,7 +15,8 @@ export function WriteEditor() {
 
 		textarea.focus()
 		// Use execCommand to preserve undo/redo stack
-		const success = document.execCommand('insertText', false, text)
+		// Use execCommand to preserve undo/redo stack
+		const success = (document as any).execCommand('insertText', false, text)
 
 		if (!success) {
 			// Fallback for browsers that don't support execCommand

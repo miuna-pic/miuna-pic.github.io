@@ -228,16 +228,16 @@ const themes = [
             Anime Trace
           </div>
         </summary>
-        <div class="p-2 bg-base-100 rounded-box flex flex-col gap-2" onclick="event.stopPropagation()">
-          <input type="file" id="animetrace-file" accept="image/*" class="file-input file-input-bordered file-input-xs w-full" />
-          <select id="animetrace-model" class="select select-bordered select-xs w-full">
-            <option value="animetrace_high_beta" selected>High Quality (Beta)</option>
-            <option value="pre_stable">Anime</option>
-            <option value="anime_model_lovelive">LoveLive (Legacy)</option>
-            <option value="full_game_model_kira">GalGame (Legacy)</option>
-          </select>
-          <button id="animetrace-btn" class="btn btn-xs btn-primary w-full">Search</button>
-          <div id="animetrace-result" class="text-xs font-mono bg-base-200 p-2 rounded max-h-40 overflow-y-auto hidden whitespace-pre-wrap"></div>
+        <div id="desktop-animetrace-container" class="p-2 bg-base-100 rounded-box flex flex-col gap-2">
+           <input type="file" id="animetrace-file" accept="image/*" class="file-input file-input-bordered file-input-xs w-full" />
+           <select id="animetrace-model" class="select select-bordered select-xs w-full">
+             <option value="animetrace_high_beta" selected>High Quality (Beta)</option>
+             <option value="pre_stable">Anime</option>
+             <option value="anime_model_lovelive">LoveLive (Legacy)</option>
+             <option value="full_game_model_kira">GalGame (Legacy)</option>
+           </select>
+           <button id="animetrace-btn" class="btn btn-xs btn-primary w-full">Search</button>
+           <div id="animetrace-result" class="text-xs font-mono bg-base-200 p-2 rounded max-h-40 overflow-y-auto hidden whitespace-pre-wrap"></div>
         </div>
       </details>
     </li>
@@ -250,7 +250,7 @@ const themes = [
              Don't click on it!
           </div>
         </summary>
-        <div class="p-2 bg-base-100 rounded-box" onclick="event.stopPropagation()">
+        <div id="desktop-chaos-container" class="p-2 bg-base-100 rounded-box">
           <button id="chaos-btn" class="btn btn-sm btn-error w-full font-bold text-white chaos-btn-animate">
              DO NOT PRESS
           </button>
@@ -262,6 +262,15 @@ const themes = [
 
 <script is:inline define:vars={{ SITE_THEME }}>
   document.addEventListener("astro:page-load", () => {
+    // Prevent closing dropdowns when clicking inside containers
+    const containers = ['desktop-animetrace-container', 'desktop-chaos-container'];
+    containers.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('click', (e) => e.stopPropagation());
+        }
+    });
+
     // ... (Existing Theme Helper & Color Logic)
     // Theme Helper
     const isDarkTheme = (theme) => ['dark', 'synthwave', 'halloween', 'forest', 'black', 'luxury', 'dracula', 'business', 'night', 'coffee', 'dim', 'sunset'].includes(theme);
@@ -275,7 +284,7 @@ const themes = [
 
     const utf8_to_b64 = (str) => {
         try {
-            return window.btoa(unescape(encodeURIComponent(str)));
+            return window.btoa(new TextEncoder().encode(str).reduce((data, byte) => data + String.fromCharCode(byte), ''));
         } catch (e) {
             return "Error: Invalid Input";
         }
@@ -283,7 +292,7 @@ const themes = [
 
     const b64_to_utf8 = (str) => {
         try {
-            return decodeURIComponent(escape(window.atob(str)));
+            return new TextDecoder().decode(Uint8Array.from(window.atob(str), c => c.charCodeAt(0)));
         } catch (e) {
             return "Error: Invalid Base64";
         }
@@ -713,7 +722,7 @@ const themes = [
 
                 // 2. Data loop
                 if (data.data && Array.isArray(data.data)) {
-                    data.data.forEach((item, index) => {
+                    data.data.forEach((item) => {
                          // API uses 'character' as the key for the list of matches
                          if (item.character && Array.isArray(item.character)) {
                              item.character.forEach(c => {

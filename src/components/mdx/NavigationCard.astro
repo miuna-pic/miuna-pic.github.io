@@ -16,25 +16,7 @@ const { name, avatar, description, url, category, id, badge, badgeIcon, badgeCol
 import { Image } from "astro:assets";      
 import { Icon } from "astro-icon/components";      
 
-// 基于名称生成固定的随机索引，用于显示随机的可爱标签
-const getHash = (str: string) => {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash);
-};
-
-const cuteTags = [
-  { icon: "lucide:sparkles", text: "宝藏资源", color: "text-amber-500", bg: "bg-amber-500/10", border: "border-amber-500/20" },
-  { icon: "lucide:heart", text: "超级好用", color: "text-rose-500", bg: "bg-rose-500/10", border: "border-rose-500/20" },
-  { icon: "lucide:thumbs-up", text: "值得一试", color: "text-sky-500", bg: "bg-sky-500/10", border: "border-sky-500/20" },
-  { icon: "lucide:zap", text: "效率神器", color: "text-violet-500", bg: "bg-violet-500/10", border: "border-violet-500/20" },
-  { icon: "lucide:party-popper", text: "发现惊喜", color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
-  { icon: "lucide:star", text: "五星推荐", color: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/20" },
-];
+// Unused random tag generation logic removed
 
 let tag: { icon: string; text: string; className: string; style?: any } | undefined;
 

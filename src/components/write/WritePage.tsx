@@ -29,7 +29,7 @@ export default function WritePage({ categories = [] }: WritePageProps) {
         }
     }, [])
 
-    const { loading } = useLoadBlog(slug || undefined)
+    useLoadBlog(slug || undefined)
 
     const coverPreviewUrl = cover ? (cover.type === 'url' ? cover.url : cover.previewUrl) : null
 

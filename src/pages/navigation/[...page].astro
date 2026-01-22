@@ -114,24 +114,19 @@ const items = page.data;
 <script>
   // 简单的客户端搜索和过滤逻辑
   document.addEventListener('astro:page-load', () => {
-    const searchInput = document.getElementById('search-input') as HTMLInputElement;
-    const categoryBtns = document.querySelectorAll('.category-btn');
-    const resourceItems = document.querySelectorAll('.resource-item');
-    const noResults = document.getElementById('no-results');
+    // const searchInput = document.getElementById('search-input') as HTMLInputElement;
+    // const categoryBtns = document.querySelectorAll('.category-btn');
+    // const resourceItems = document.querySelectorAll('.resource-item');
+    // const noResults = document.getElementById('no-results');
     
-    let currentCategory = 'all';
-    let currentSearch = '';
+    // let currentCategory = 'all';
+    // let currentSearch = '';
 
-    function filterItems() {
-      let visibleCount = 0;
-
-      resourceItems.forEach(item => {
-        const itemCategory = (item as HTMLElement).dataset.category; // 这里其实是具体的子分类，我们需要匹配大分类
-        // 由于数据结构扁平化了，我们需要一种方式知道item属于哪个大分类。
-        // 简单起见，我们重新遍历数据或者在渲染时把大分类也加上。
-        // 让我们修改上面的渲染逻辑，把大分类加到 data-parent-category 属性中。
-      });
-    }
+    // function filterItems() {
+    //   resourceItems.forEach(item => {
+         // Placeholder for future logic
+    //   });
+    // }
   });
 </script>
 
@@ -163,7 +158,7 @@ const items = page.data;
       });
     });
 
-    let currentSearch = '';
+    // let currentSearch = '';
 
     function createCardHtml(item) {
       const hostname = new URL(item.url).hostname;

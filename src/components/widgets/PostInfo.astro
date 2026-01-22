@@ -2,10 +2,10 @@
 import { Icon } from "astro-icon/components";  
 import { t } from "@config";  
 import type { PostData } from "@interfaces/data";  
-const { pubDate, badge, word, time, url, hideViews = false } = Astro.props as PostData & { url?: string, hideViews?: boolean };  
+const { pubDate, badge, word, time } = Astro.props as PostData & { url?: string };  
   
 // 从 URL 中提取 slug  
-const slug = url ? url.split('/').filter(Boolean).pop() : undefined;  
+// const slug = url ? url.split('/').filter(Boolean).pop() : undefined;  
 ---  
   
 <div class="flex flex-col sm:flex-row sm:justify-between gap-y-1 sm:gap-y-2 mb-2 sm:mb-4 text-[10px] sm:text-sm opacity-75">  

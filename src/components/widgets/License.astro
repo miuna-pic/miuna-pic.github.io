@@ -1,6 +1,6 @@
 ---  
 import dayjs from "@utils/dayjs";  
-import { USER_NAME, DATE_FORMAT, t, umamiConfig } from "@config";  
+import { USER_NAME, DATE_FORMAT, t } from "@config";  
 import type { PostData } from "@interfaces/data";  
 import { Icon } from "astro-icon/components";  
 import PostFilter from "./PostFilter.astro";  
@@ -9,7 +9,7 @@ const { title, url, pubDate, badge, categories = [], tags = [], word, time } = A
 const displayDate = pubDate ? dayjs(pubDate).format(DATE_FORMAT) : "";  
   
 // 从 URL 中提取 slug  
-const slug = url ? url.toString().split('/').filter(Boolean).pop() : undefined;  
+// const slug = url ? url.toString().split('/').filter(Boolean).pop() : undefined;  
   
 const socialLinks = [  
   {  

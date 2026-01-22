@@ -4,7 +4,6 @@ import { getAuthToken } from '@/lib/auth'
 import { GITHUB_CONFIG } from '@/consts'
 import {
     readTextFileFromRepo,
-    putFile,
     toBase64Utf8,
     createBlob,
     createTree,
@@ -50,7 +49,6 @@ export function ConfigPage() {
     const keyInputRef = useRef<HTMLInputElement>(null)
 
     // Image upload state
-    const [uploadingImage, setUploadingImage] = useState(false)
     const [uploadTarget, setUploadTarget] = useState<string>('')
     const imageInputRef = useRef<HTMLInputElement>(null)
     // 缓存待上传图片 { [targetKey]: { file, previewUrl } }
@@ -436,11 +434,6 @@ export function ConfigPage() {
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" /></svg>
                                                 </button>
                                             </div>
-                                            {uploadingImage && uploadTarget === 'site.favicon' && (
-                                                <div className="absolute inset-0 flex items-center justify-center bg-base-100/80 rounded-2xl md:rounded-3xl z-10">
-                                                    <span className="loading loading-spinner loading-md text-primary"></span>
-                                                </div>
-                                            )}
                                         </div>
                                         <input
                                             type="text"
@@ -461,11 +454,6 @@ export function ConfigPage() {
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" /></svg>
                                                 </button>
                                             </div>
-                                            {uploadingImage && uploadTarget === 'user.avatar' && (
-                                                <div className="absolute inset-0 flex items-center justify-center bg-base-100/80 rounded-2xl md:rounded-3xl z-10">
-                                                    <span className="loading loading-spinner loading-md text-primary"></span>
-                                                </div>
-                                            )}
                                         </div>
                                         <input
                                             type="text"

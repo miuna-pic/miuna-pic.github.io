@@ -1,15 +1,14 @@
 import { motion } from 'motion/react'
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { toast } from 'sonner'
 import { useWriteStore } from '../stores/write-store'
 import { usePreviewStore } from '../stores/preview-store'
 import { usePublish } from '../hooks/use-publish'
 
 export function WriteActions() {
-	const { loading, mode, form, loadBlogForEdit, originalSlug, updateForm } = useWriteStore()
+	const { loading, mode, form, originalSlug, updateForm } = useWriteStore()
 	const { openPreview } = usePreviewStore()
 	const { isAuth, onChoosePrivateKey, onPublish, onDelete } = usePublish()
-	const [saving, setSaving] = useState(false)
 	const keyInputRef = useRef<HTMLInputElement>(null)
 	const mdInputRef = useRef<HTMLInputElement>(null)
 
@@ -17,10 +16,10 @@ export function WriteActions() {
 		if (!isAuth) {
 			keyInputRef.current?.click()
 		} else {
-			const confirmMsg = mode === 'edit' 
-				? `确定更新《${form.title}》吗？这将直接推送到 GitHub 仓库。` 
+			const confirmMsg = mode === 'edit'
+				? `确定更新《${form.title}》吗？这将直接推送到 GitHub 仓库。`
 				: `确定发布《${form.title}》吗？这将直接推送到 GitHub 仓库。`
-			
+
 			if (window.confirm(confirmMsg)) {
 				onPublish()
 			}
@@ -119,7 +118,6 @@ export function WriteActions() {
 							whileHover={{ scale: 1.05 }}
 							whileTap={{ scale: 0.95 }}
 							onClick={handleCancel}
-							disabled={saving}
 							className='btn btn-sm btn-ghost rounded-xl'>
 							取消
 						</motion.button>
