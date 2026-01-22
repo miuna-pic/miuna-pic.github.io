@@ -127,7 +127,7 @@ user:
         ariaLabel: BiliBili
         title: BiliBili
         svg: ri:bilibili-line
-      - href: https://miuna-pic.github.io/rss.xml
+      - href: https://blog.000.moe/rss.xml
         ariaLabel: Subscribe via Folo
         title: RSS
         svg: ri:rss-fill
