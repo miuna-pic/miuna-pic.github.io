@@ -62,14 +62,14 @@ const initialRandomImage = `${RANDOM_API_URL}?t=${Date.now()}`;
     <!-- 背景层：当前显示的图片 -->
     <div 
       id="banner-bg-current"
-      class="absolute left-0 top-0 h-full w-full bg-cover bg-center bg-no-repeat z-0 transition-opacity duration-1000"
+      class="absolute left-0 top-0 h-full w-full bg-cover bg-top md:bg-center bg-no-repeat z-0 transition-opacity duration-1000"
       style={{ backgroundImage: `url(${initialRandomImage})` }}
     ></div>
 
     <!-- 背景层：下一张预加载的图片 (初始隐藏) -->
     <div 
       id="banner-bg-next"
-      class="absolute left-0 top-0 h-full w-full bg-cover bg-center bg-no-repeat z-0 opacity-0 transition-opacity duration-1000"
+      class="absolute left-0 top-0 h-full w-full bg-cover bg-top md:bg-center bg-no-repeat z-0 opacity-0 transition-opacity duration-1000"
     ></div>
 
     <!-- 遮罩层 -->
