@@ -1,32 +1,12 @@
 // 评论系统配置类型
-export interface GiscusConfig {
-  repo: string;
-  repoId: string;
-  category: string;
-  categoryId: string;
-  mapping?: string;
-  lang?: string;
-  inputPosition?: string;
-  reactionsEnabled?: string;
-  emitMetadata?: string;
-  loading?: string;
-}
-
-export interface WalineConfig {
-  serverURL: string;
-  lang?: string;
-  emoji?: string[];
-  meta?: string[];
-  requiredMeta?: string[];
-  reaction?: boolean;
-  pageview?: boolean;
+export interface TwikooConfig {
+  envId: string;
 }
 
 export interface CommentsConfig {
   enable: boolean;
-  type: 'giscus' | 'waline' | 'none';
-  giscus?: GiscusConfig;
-  waline?: WalineConfig;
+  type: 'twikoo' | 'none';
+  twikoo?: TwikooConfig;
 }
 export interface SubMenuItem {
   id: string;

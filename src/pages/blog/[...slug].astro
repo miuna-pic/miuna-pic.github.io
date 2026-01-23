@@ -8,8 +8,7 @@ import { type CollectionEntry, getCollection } from "astro:content";
 import dayjs from "@utils/dayjs";
 import { DATE_FORMAT } from "@config";
 import MainCard from "@/components/MainCard.astro";
-import Giscus from "@components/comments/Giscus.astro";
-import Waline from "@components/comments/Waline.astro";
+import Twikoo from "@components/comments/Twikoo.astro";
 import { commentsConfig } from "@config";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 import { Icon } from "astro-icon/components";
@@ -88,7 +87,7 @@ const url = new URL(`/blog/${blog.slug}`, Astro.url.origin);
     <div class="mt-8">
       <div
         id="content"
-        class="prose prose-lg prose-code:text-base max-w-none text-justify prose-headings:scroll-mt-20 prose-img:rounded-2xl prose-img:mx-auto prose-img:cursor-pointer"
+        class="prose md:prose-lg prose-code:text-base max-w-none text-justify prose-headings:scroll-mt-20 prose-img:rounded-2xl prose-img:mx-auto prose-img:cursor-pointer"
       >
         <Content />
         <License
@@ -103,30 +102,19 @@ const url = new URL(`/blog/${blog.slug}`, Astro.url.origin);
           time={remarkPluginFrontmatter.readingTime}
         />
       </div>
+      </div>
     </div>
+    <!-- 添加文章导航 -->
+    <PostNavigation prevPost={prevPost} nextPost={nextPost} />
   </MainCard>
 
-  <!-- 添加文章导航 -->
-  <PostNavigation prevPost={prevPost} nextPost={nextPost} />
+  {
+    commentsConfig?.enable &&
+      commentsConfig.type === "twikoo" &&
+      commentsConfig.twikoo && (
+        <section class="comments">
 
-  <!-- Comments Section -->
-  {
-    commentsConfig?.enable &&
-      commentsConfig.type === "giscus" &&
-      commentsConfig.giscus && (
-        <section class="comments">
-          <h2>Comments</h2>
-          <Giscus {...commentsConfig.giscus} />
-        </section>
-      )
-  }
-  {
-    commentsConfig?.enable &&
-      commentsConfig.type === "waline" &&
-      commentsConfig.waline && (
-        <section class="comments">
-          <h2>Comments</h2>
-          <Waline {...commentsConfig.waline} />
+          <Twikoo {...commentsConfig.twikoo} />
         </section>
       )
   }

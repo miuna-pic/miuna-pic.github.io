@@ -147,28 +147,7 @@ user:
         svg: ri:telegram-line
 comments:
   enable: true
-  type: giscus
-  giscus:
-    repo: flhcxcat/miuna-pic.github.io
-    repoId: R_kgDOQ7gmgQ
-    category: General
-    categoryId: DIC_kwDOQ7gmgc4C1EHw
-    mapping: pathname
-    lang: zh-CN
-    inputPosition: top
-    reactionsEnabled: '1'
-    emitMetadata: '0'
-    loading: lazy
-  waline:
-    serverURL: https://your-waline-server
-    lang: zh-CN
-    emoji:
-      - https://unpkg.com/@waline/emojis@1.1.0/weibo
-      - https://unpkg.com/@waline/emojis@1.1.0/bilibili
-    meta:
-      - nick
-      - mail
-      - link
-    requiredMeta: []
-    reaction: false
-    pageview: false
+  type: twikoo
+  twikoo:
+    envId: 'https://twikoo.000.moe/.netlify/functions/twikoo'
+

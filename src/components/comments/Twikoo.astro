@@ -1,0 +1,40 @@
+---
+interface Props {
+  envId: string;
+}
+
+import Card from "@/components/temple/Card.astro";
+const { envId } = Astro.props;
+---
+
+<Card class="p-6">
+  <div id="tcomment"></div>
+</Card>
+
+<script is:inline defer src="https://cdn.staticfile.org/twikoo/1.6.44/twikoo.all.min.js"></script>
+
+<script define:vars={{ envId }}>
+  function initTwikoo() {
+    if (typeof twikoo !== 'undefined') {
+      twikoo.init({
+        envId: envId,
+        el: '#tcomment',
+      });
+    }
+  }
+
+  // 立即初始化
+  initTwikoo();
+
+  // 监听脚本加载完成（如果是首次加载）
+  document.addEventListener('load', (e) => {
+    if (e.target.src && e.target.src.includes('twikoo')) {
+      initTwikoo();
+    }
+  }, true);
+
+  // 视图转换兼容
+  document.addEventListener('astro:page-load', initTwikoo);
+</script>
+
+
