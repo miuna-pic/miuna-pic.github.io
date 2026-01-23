@@ -109,8 +109,8 @@ github:
 umami:
   enable: true
   baseUrl: https://umami.000.moe
-  shareId: XaITv25F0qy9CV30
-  websiteId: 41a00d55-d515-4753-a945-1b68f9d8c81c
+  shareId: vd8qlxAvqAs6tE20
+  websiteId: 99b08400-57e3-4fbc-89c7-95b22dd31bf2
   timezone: Asia/Shanghai
 user:
   name: Miuna
