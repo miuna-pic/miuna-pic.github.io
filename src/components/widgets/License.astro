@@ -1,50 +1,18 @@
 ---  
 import dayjs from "@utils/dayjs";  
-import { USER_NAME, DATE_FORMAT, t } from "@config";  
+import { USER_NAME, DATE_FORMAT, t, USER_AVATAR } from "@config";  
 import type { PostData } from "@interfaces/data";  
 import { Icon } from "astro-icon/components";  
 import PostFilter from "./PostFilter.astro";  
   
-const { title, url, pubDate, badge, categories = [], tags = [], word, time } = Astro.props as PostData;  
-const displayDate = pubDate ? dayjs(pubDate).format(DATE_FORMAT) : "";  
-  
-// 从 URL 中提取 slug  
-// const slug = url ? url.toString().split('/').filter(Boolean).pop() : undefined;  
-  
-const socialLinks = [  
-  {  
-    name: "X (Twitter)",  
-    icon: "ri:twitter-x-line",  
-    class: "bg-black hover:bg-gray-800",  
-    url: `https://twitter.com/intent/tweet/?text=${title}&url=${url}`,  
-  },  
-  {  
-    name: "Telegram",  
-    icon: "ri:telegram-line",  
-    class: "bg-[#26a5e4] hover:bg-[#1e96d1]",  
-    url: `https://telegram.me/share/url?text=${title}&url=${url}`,  
-  },
-  {  
-    name: "Reddit",  
-    icon: "ri:reddit-line",  
-    class: "bg-[#ff4500] hover:bg-[#e63e00]",  
-    url: `https://reddit.com/submit/?url=${url}&title=${title}`,  
-  },  
-  {  
-    name: "Facebook",  
-    icon: "ri:facebook-circle-line",  
-    class: "bg-[#0866ff] hover:bg-[#0755d6]",  
-    url: `https://facebook.com/sharer/sharer.php?u=${url}`,  
-  },  
-  {  
-    name: "Email",  
-    icon: "ri:mail-line",  
-    class: "bg-gray-600 hover:bg-gray-700",  
-    url: `mailto:?subject=${title}&body=${url}`,  
-  },  
-];  
+const { title, url, pubDate, badge, categories = [], tags = [], word, time, description, image } = Astro.props as PostData;  
+const displayDate = pubDate ? dayjs(pubDate).format(DATE_FORMAT) : "";
+const dateObj = dayjs(pubDate || new Date());
+const dateDay = dateObj.format('DD');
+const dateYearMonth = dateObj.format('YYYY / MM');
 ---  
   
+<!-- Article Bottom Section -->
 <hr />  
 <div class="container p-0">  
   <div class="text-right text-sm text-base-content/60 italic mb-2">  
@@ -60,71 +28,40 @@ const socialLinks = [
         </div>  
       </div>  
   
-      <!-- Article Metadata -->  
       <div class="space-y-4">  
         <h3 class="text-lg sm:text-xl lg:text-2xl font-bold">{title}</h3>  
   
-        <!-- Stats Row -->  
         <div class="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm opacity-75">  
-          {  
-            displayDate && (  
-              <span class="flex items-center gap-1">  
-                <Icon name="lucide:calendar" class="h-4 w-4" />  
-                {displayDate}  
-              </span>  
-            )  
-          }  
-  
-          {  
-            badge && (  
-              <span class="flex items-center gap-1">  
-                <Icon name="lucide:bookmark" class="h-4 w-4" />  
-                {badge}  
-              </span>  
-            )  
-          }  
-  
-          {  
-            word && time && (  
-              <div class="flex items-center gap-1">  
-                <Icon name="lucide:book-open" class="h-4 w-4" />  
-                <span>  
-                  {word} {t("label.wordCount")} · {time} {t("label.readTime")}  
-                </span>  
-              </div>  
-            )  
-          }  
-  
-
+          {displayDate && (<span class="flex items-center gap-1"><Icon name="lucide:calendar" class="h-4 w-4" />{displayDate}</span>)}  
+          {badge && (<span class="flex items-center gap-1"><Icon name="lucide:bookmark" class="h-4 w-4" />{badge}</span>)}  
+          {word && time && (<div class="flex items-center gap-1"><Icon name="lucide:book-open" class="h-4 w-4" /><span>{word} {t("label.wordCount")} · {time} {t("label.readTime")}</span></div>)}  
         </div>  
   
-        <!-- Categories and Tags -->  
         <div class="mt-4">  
           <PostFilter categories={categories} tags={tags} />  
-          <!-- License Info -->  
           <hr class="my-4" />  
           <div class="flex justify-between items-center flex-wrap gap-4">  
             <div class="text-sm opacity-75">  
               © {USER_NAME} |  
-              <a  
-                href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed"  
-                target="_blank"  
-                rel="noopener noreferrer"  
-                class="hover:text-primary transition-colors"  
-              >  
-                CC BY-NC-SA 4.0  
-              </a>  
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed" target="_blank" rel="noopener noreferrer" class="hover:text-primary transition-colors">CC BY-NC-SA 4.0</a>  
             </div>  
             <div class="flex gap-2">
-              <!-- Reward Button -->
               <button class="btn btn-secondary btn-outline" onclick="reward_modal.showModal()">
-                赞赏
-                <Icon name="ri:hand-heart-line" class="w-5 h-5" />
+                赞赏 <Icon name="ri:hand-heart-line" class="w-5 h-5" />
               </button>
-              <!-- Share Button -->  
-              <button class="btn btn-primary btn-outline" onclick="share_modal.showModal()">  
-                {t("label.share")}  
-                <Icon name="ri:share-line" class="w-5 h-5" />  
+              <button 
+                id="open-share-modal" 
+                class="btn btn-primary btn-outline"
+                data-title={title}
+                data-desc={description || "Visit the link to read more."}
+                data-date-day={dateDay}
+                data-date-ym={dateYearMonth}
+                data-author={USER_NAME}
+                data-image={image || ""}
+                data-url={url}
+                data-avatar={USER_AVATAR || ""}
+              >  
+                {t("label.share")} <Icon name="ri:share-line" class="w-5 h-5" />  
               </button>
             </div>  
           </div>  
@@ -135,64 +72,43 @@ const socialLinks = [
   
   <!-- Share Modal -->  
   <dialog id="share_modal" class="modal modal-bottom sm:modal-middle">  
-    <div class="modal-box max-w-2xl rounded-none sm:rounded-xl relative">  
-      <h3 class="font-bold text-lg sm:text-xl mb-6 text-center">  
-        {t("label.shareCard")}  
-      </h3>  
-      <div class="flex flex-wrap gap-4 justify-center">  
-        {  
-          socialLinks.map(({ name, icon, class: bgClass, url }) => (  
-            <a  
-              href={url}  
-              class={`btn btn-circle btn-lg transition-transform hover:scale-110 ${bgClass}`}  
-              target="_blank"  
-              rel="noopener noreferrer"  
-              title={name}  
-            >  
-              <span class="sr-only">{name}</span>  
-              <Icon name={icon} class="w-6 h-6 text-white" />  
-            </a>  
-          ))  
-        }
-        <!-- Copy Link Button -->
-        <button
-          class="btn btn-circle btn-lg transition-transform hover:scale-110 bg-neutral hover:bg-neutral-focus"
-          title="Copy Link"
-          onclick={`navigator.clipboard.writeText(window.location.href).then(() => {
-            const btn = this;
-            const toast = document.getElementById('copy-toast');
-            btn.classList.add('btn-success');
-            if (toast) {
-              toast.classList.remove('opacity-0', 'translate-y-4');
-            }
-            setTimeout(() => {
-              btn.classList.remove('btn-success');
-              if (toast) {
-                toast.classList.add('opacity-0', 'translate-y-4');
-              }
-            }, 2000);
-          })`}
-        >
-          <span class="sr-only">Copy Link</span>
-          <Icon name="ri:links-line" class="w-6 h-6 text-white" />
-        </button>  
-      </div>
+    <div class="modal-box w-auto max-w-sm p-0 bg-base-100 rounded-2xl overflow-hidden shadow-2xl"> 
+      <!-- Content Wrapper -->
+      <div class="flex flex-col">
+        <!-- Preview Area -->
+        <div class="p-6 flex justify-center items-center bg-base-200/50 min-h-[440px]">
+             <!-- Result Image -->
+            <div id="share-result" class="hidden shadow-lg rounded-none overflow-hidden transition-all duration-300 transform scale-100">
+                <img id="generated-card-img" class="block w-[300px] h-[400px] object-contain bg-white" crossorigin="anonymous" />
+            </div>
+            
+            <!-- Loading State -->
+            <div id="share-loading" class="flex flex-col items-center justify-center absolute inset-0 z-10 bg-base-100/80 backdrop-blur-sm hidden">
+                <span class="loading loading-spinner loading-lg text-primary"></span>
+                <p class="mt-4 text-sm font-medium opacity-70">正在绘制海报...</p>
+            </div>
+        </div>
 
-      <!-- Toast Notification inside Modal -->
-      <div id="copy-toast" class="absolute left-1/2 -translate-x-1/2 bottom-20 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none z-50 w-max">
-        <div class="alert alert-success shadow-lg text-white py-2 px-4 text-sm">
-          <Icon name="ri:checkbox-circle-line" class="w-5 h-5" />
-          <span>链接已复制成功！</span>
+        <!-- Action Buttons -->
+        <div class="p-4 grid grid-cols-2 gap-3 border-t border-base-200 bg-base-100">
+            <button id="copy-card-btn" class="btn btn-md bg-base-200 hover:bg-base-300 border-none text-base-content rounded-xl flex items-center justify-center gap-2 font-medium transition-transform active:scale-95">
+                <Icon name="ri:link" class="w-5 h-5" />
+                复制链接
+            </button>
+            <button id="save-card-btn" class="btn btn-md btn-primary border-none text-white rounded-xl flex items-center justify-center gap-2 font-medium shadow-md transition-transform active:scale-95 disabled:opacity-50">
+                <Icon name="ri:download-line" class="w-5 h-5" />
+                保存海报
+            </button>
         </div>
       </div>
-
-      <div class="modal-action">  
-        <form method="dialog">  
-          <button class="btn btn-ghost hover:scale-105 transition-transform">  
-            {t("label.close")}  
-          </button>  
-        </form>  
-      </div>  
+      
+      <!-- Toast -->
+      <div id="copy-toast" class="absolute top-6 left-1/2 -translate-x-1/2 transition-all duration-300 opacity-0 -translate-y-4 pointer-events-none z-50">
+        <div class="alert alert-success shadow-lg text-white py-2 px-6 text-sm font-medium rounded-full flex items-center gap-2">
+          <Icon name="ri:checkbox-circle-line" class="w-5 h-5" />
+          <span>已复制到剪贴板</span>
+        </div>
+      </div>
     </div>  
     <form method="dialog" class="modal-backdrop">  
       <button>{t("label.close")}</button>  
@@ -202,61 +118,349 @@ const socialLinks = [
   <!-- Reward Modal -->
   <dialog id="reward_modal" class="modal modal-middle">
     <div class="modal-box w-11/12 max-w-4xl rounded-xl relative overflow-x-hidden">
-      <h3 class="font-bold text-lg sm:text-xl mb-6 text-center">
-        赞赏支持
-      </h3>
-      
+      <h3 class="font-bold text-lg sm:text-xl mb-6 text-center">赞赏支持</h3>
       <div class="flex flex-row justify-center items-center gap-4 md:gap-8 p-4">
-        <!-- WeChat -->
         <div class="flex flex-col items-center gap-2">
           <div class="w-28 h-28 md:w-44 md:h-44 bg-white rounded-xl overflow-hidden shadow-lg border border-base-300 flex items-center justify-center">
             <img src="/weixin.jpg" alt="微信收款码" class="w-full h-full object-contain" />
           </div>
           <div class="flex items-center gap-1 md:gap-2 text-success font-bold text-xs md:text-base">
-            <Icon name="ri:wechat-pay-line" class="w-4 h-4 md:w-6 md:h-6" />
-            <span>微信</span>
+            <Icon name="ri:wechat-pay-line" class="w-4 h-4 md:w-6 md:h-6" /> <span>微信</span>
           </div>
         </div>
-
-        <!-- Alipay -->
         <div class="flex flex-col items-center gap-2">
           <div class="w-28 h-28 md:w-44 md:h-44 bg-white rounded-xl overflow-hidden shadow-lg border border-base-300 flex items-center justify-center">
             <img src="/zhifubao.jpg" alt="支付宝收款码" class="w-full h-full object-contain" />
           </div>
           <div class="flex items-center gap-1 md:gap-2 text-[#1677ff] font-bold text-xs md:text-base">
-            <Icon name="ri:alipay-line" class="w-4 h-4 md:w-6 md:h-6" />
-            <span>支付宝</span>
+            <Icon name="ri:alipay-line" class="w-4 h-4 md:w-6 md:h-6" /> <span>支付宝</span>
           </div>
         </div>
       </div>
-
       <div class="modal-action">
-        <form method="dialog">
-          <button class="btn btn-ghost hover:scale-105 transition-transform">
-            {t("label.close")}
-          </button>
-        </form>
+        <form method="dialog"><button class="btn btn-ghost hover:scale-105 transition-transform">{t("label.close")}</button></form>
       </div>
     </div>
-    <form method="dialog" class="modal-backdrop">
-      <button>{t("label.close")}</button>
-    </form>
+    <form method="dialog" class="modal-backdrop"><button>{t("label.close")}</button></form>
   </dialog>
-</div>  
-  
+</div>
 
-  
+<script>
+  import QRCode from "qrcode";
+
+  // Proxy for CORS images
+  function getProxyUrl(url: string) {
+      if(!url) return "";
+      if(url.startsWith('/') || url.startsWith(window.location.origin)) {
+          return url;
+      }
+      return `https://wsrv.nl/?url=${encodeURIComponent(url)}&output=jpg`;
+  }
+
+  // Helper to load image
+  function loadImage(url: string): Promise<HTMLImageElement> {
+      return new Promise((resolve, reject) => {
+          const img = new Image();
+          if (!url.startsWith('/') && !url.startsWith(window.location.origin)) {
+              img.crossOrigin = 'Anonymous';
+          }
+          img.onload = () => resolve(img);
+          img.onerror = () => reject(new Error(`Failed to load ${url}`));
+          img.src = getProxyUrl(url);
+      });
+  }
+
+  // Pre-calculate lines for text wrapping
+  function getLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+      if(!text) return [];
+      const words = text.split('');
+      const lines = [];
+      let currentLine = words[0];
+
+      for (let i = 1; i < words.length; i++) {
+          const word = words[i];
+          const width = ctx.measureText(currentLine + word).width;
+          if (width < maxWidth) {
+              currentLine += word;
+          } else {
+              lines.push(currentLine);
+              currentLine = word;
+          }
+      }
+      lines.push(currentLine);
+      return lines;
+  }
+
+  // Draw Card Logic
+  async function generateShareCard(data: any, canvas: HTMLCanvasElement) {
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      
+      const width = 300;
+      const bannerHeight = 160;
+      const footerHeight = 64;
+
+
+      // 1. MEASURE HEIGHT DYNAMICALLY
+      // Set font for measurement
+      ctx.font = 'bold 16px sans-serif'; 
+      const titleLines = getLines(ctx, data.title || "No Title", 260); // Title Width Limit
+      
+      ctx.font = '10px sans-serif';
+      const descLines = getLines(ctx, data.desc || "", 250); // Desc Width Limit
+
+      // Calc Heights
+      const titleLineH = 22;
+      const descLineH = 14;
+      const titleTotalH = titleLines.length * titleLineH;
+      // Limit description lines if too long (e.g. max 10 lines)
+      const maxDescLines = 10;
+      const actualDescLines = descLines.slice(0, maxDescLines);
+      const descTotalH = actualDescLines.length * descLineH;
+
+      // Layout:
+      // Top (0) -> Banner (160)
+      // Badge overlaps, so content starts at 160 + 20 (gap) = 180?
+      // Actually badge bottom is 188. Let's start at 196 safe.
+      const contentStartY = 196;
+      
+      // Spacing components
+      // Title Block
+      // Gap (20)
+      // Desc Block
+      // Gap (20)
+      // Footer (64)
+      
+      const bodyHeight = titleTotalH + 20 + descTotalH + 24; 
+      
+      let totalHeight = contentStartY + bodyHeight + footerHeight;
+      // Enforce Min Height for style usually 400 is good, but user wants less whitespace.
+      // Let's set min 380 just to be safe for badge.
+      if(totalHeight < 380) totalHeight = 380;
+
+      // 2. SETUP CANVAS
+      const scale = 2;
+      canvas.width = width * scale;
+      canvas.height = totalHeight * scale;
+      ctx.scale(scale, scale);
+
+      // 3. DRAWING
+      // Background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, width, totalHeight);
+
+      // Banner
+      ctx.fillStyle = '#f3f4f6';
+      ctx.fillRect(0, 0, width, bannerHeight);
+
+      // Banner Image
+      if(data.image) {
+          try {
+              const img = await loadImage(data.image);
+              const hRatio = width / img.width;
+              const vRatio = bannerHeight / img.height;
+              const ratio = Math.max(hRatio, vRatio);
+              const cx = (width - img.width * ratio) / 2;
+              const cy = (bannerHeight - img.height * ratio) / 2;
+              ctx.save();
+              ctx.beginPath();
+              ctx.rect(0, 0, width, bannerHeight);
+              ctx.clip();
+              ctx.drawImage(img, 0, 0, img.width, img.height, cx, cy, img.width * ratio, img.height * ratio);
+              ctx.restore();
+          } catch(e) { /* Fallback */ }
+      } else {
+         ctx.fillStyle = '#e5e7eb';
+         ctx.fillRect(0, 0, width, bannerHeight);
+         ctx.fillStyle = '#ffffff';
+         ctx.font = 'bold 60px sans-serif';
+         ctx.textAlign = 'center';
+         ctx.textBaseline = 'middle';
+         ctx.globalAlpha = 0.5;
+         ctx.fillText((data.title || "T").charAt(0).toUpperCase(), width/2, bannerHeight/2);
+         ctx.globalAlpha = 1.0; 
+      }
+
+      // Date Badge (Standard Position)
+      const badgeSize = 56;
+      const badgeX = 16;
+      const badgeY = bannerHeight - (badgeSize / 2); // 132
+      
+      ctx.fillStyle = '#999999';
+      ctx.beginPath();
+      if(ctx.roundRect) ctx.roundRect(badgeX, badgeY, badgeSize, badgeSize, 4);
+      else ctx.rect(badgeX, badgeY, badgeSize, badgeSize);
+      ctx.fill();
+      
+      // Badge Text
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.font = '900 26px sans-serif';
+      ctx.fillText(data.dateDay || "01", badgeX + badgeSize/2, badgeY + 28);
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      ctx.fillRect(badgeX + 10, badgeY + 32, 36, 1);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 9px sans-serif';
+      ctx.fillText(data.dateYM || "2024 / 01", badgeX + badgeSize/2, badgeY + 46);
+
+      // 4. Content Render
+      let currentY = contentStartY;
+      const px = 16;
+      
+      // Title
+      ctx.fillStyle = '#1a1a1a';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      titleLines.forEach(line => {
+          ctx.fillText(line, px, currentY);
+          currentY += titleLineH;
+      });
+
+      // Description
+      currentY += 12; // Gap before desc
+
+      
+      // Grey Bar Height = Desc height
+      // We need to draw bar first
+      const drawnDescLines = actualDescLines;
+      const barHeight = Math.max(24, drawnDescLines.length * descLineH);
+      
+      ctx.fillStyle = '#e5e7eb';
+      ctx.fillRect(px, currentY + 2, 3, barHeight); // Bar
+      
+      ctx.fillStyle = '#666666';
+      ctx.font = '10px sans-serif';
+      drawnDescLines.forEach(line => {
+          ctx.fillText(line, px + 8, currentY);
+          currentY += descLineH;
+      });
+
+      // Footer Position
+      const footerY = totalHeight - footerHeight;
+      
+      // Separator
+      ctx.strokeStyle = '#f0f0f0';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 2]);
+      ctx.beginPath();
+      ctx.moveTo(px, footerY);
+      ctx.lineTo(width - px, footerY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      
+      // Avatar
+      const avatarSize = 40;
+      const avatarY = footerY + (footerHeight - avatarSize) / 2;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(px + avatarSize/2, avatarY + avatarSize/2, avatarSize/2, 0, Math.PI*2);
+      ctx.clip();
+      ctx.fillStyle = '#f3f4f6';
+      ctx.fillRect(px, avatarY, avatarSize, avatarSize);
+      if(data.avatar) {
+          try {
+             const avImg = await loadImage(data.avatar);
+             ctx.drawImage(avImg, px, avatarY, avatarSize, avatarSize);
+          } catch(e) { /*...*/ }
+      }
+      ctx.restore();
+
+      // Info
+      const textX = px + 50; 
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = '#999999';
+      ctx.font = '11px sans-serif';
+      ctx.fillText("Author", textX, avatarY + 14);
+      ctx.fillStyle = '#333333';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.fillText(data.author || "Guest", textX, avatarY + 32);
+
+      // QR
+      const qrSize = 46;
+      const qrX = width - px - qrSize;
+      const qrY = footerY + (footerHeight - qrSize) / 2;
+      try {
+          const tempCanvas = document.createElement('canvas');
+          await QRCode.toCanvas(tempCanvas, window.location.href, {
+              width: qrSize * 2,
+              margin: 0,
+              color: { dark: '#000000', light: '#ffffff' }
+          });
+          ctx.drawImage(tempCanvas, qrX, qrY, qrSize, qrSize);
+          ctx.strokeStyle = '#eee';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(qrX, qrY, qrSize, qrSize);
+      } catch(e) {}
+  }
+
+  async function initShareModule() {
+      const openBtn = document.getElementById('open-share-modal');
+      const modal = document.getElementById('share_modal') as HTMLDialogElement;
+      const resultImg = document.getElementById('generated-card-img') as HTMLImageElement;
+      const loading = document.getElementById('share-loading');
+      const resultContainer = document.getElementById('share-result');
+      const saveBtn = document.getElementById('save-card-btn');
+      const copyBtn = document.getElementById('copy-card-btn');
+
+      if (!openBtn || !modal) return;
+
+      openBtn.addEventListener('click', async () => {
+          modal.showModal();
+          loading?.classList.remove('hidden');
+          resultContainer?.classList.add('hidden');
+          
+          await new Promise(r => setTimeout(r, 100)); 
+
+          const data = {
+              title: openBtn.getAttribute('data-title'),
+              desc: openBtn.getAttribute('data-desc'),
+              dateDay: openBtn.getAttribute('data-date-day'),
+              dateYM: openBtn.getAttribute('data-date-ym'),
+              author: openBtn.getAttribute('data-author'),
+              image: openBtn.getAttribute('data-image'),
+              avatar: openBtn.getAttribute('data-avatar'),
+          };
+
+          try {
+              const canvas = document.createElement('canvas');
+              await generateShareCard(data, canvas);
+              
+              resultImg.src = canvas.toDataURL('image/png');
+              
+              loading?.classList.add('hidden');
+              resultContainer?.classList.remove('hidden');
+          } catch(e: any) {
+              console.error(e);
+          }
+      });
+
+      copyBtn?.addEventListener('click', async () => {
+         try { await navigator.clipboard.writeText(window.location.href); showToast(); } catch(e) {}
+      });
+
+      saveBtn?.addEventListener('click', () => {
+          if (!resultImg.src) return;
+          const link = document.createElement('a');
+          link.download = `share_${Date.now()}.png`;
+          link.href = resultImg.src;
+          link.click();
+      });
+
+      function showToast() {
+         const toast = document.getElementById('copy-toast');
+         if (toast) {
+             toast.classList.remove('opacity-0', '-translate-y-4');
+             setTimeout(() => { toast.classList.add('opacity-0', '-translate-y-4'); }, 2000);
+         }
+      }
+  }
+
+  document.addEventListener('astro:page-load', initShareModule);
+</script>
+
 <style>  
-  .modal-backdrop button {  
-    cursor: default;  
-    width: 100%;  
-    height: 100%;  
-    opacity: 0;  
-  }  
-  
-  /* Remove underlines from PostFilter buttons */  
-  :global(.card-body .btn-category),  
-  :global(.card-body .btn-tag) {  
-    text-decoration: none;  
-  }  
+  .modal-backdrop button { cursor: default; width: 100%; height: 100%; opacity: 0; }  
+  :global(.card-body .btn-category), :global(.card-body .btn-tag) { text-decoration: none; }
 </style>
