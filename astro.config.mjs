@@ -42,7 +42,10 @@ export default defineConfig({
   },
   site: USER_SITE,
   output: "static",
-  prefetch: true,
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'viewport',
+  },
   style: {
     scss: {
       includePaths: ["./src/styles"],

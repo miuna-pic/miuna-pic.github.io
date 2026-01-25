@@ -9,8 +9,8 @@ import {
   SITE_PAGES,
 } from "@config";
 import { ClientRouter } from "astro:transitions";
-import ElementCrossing from "astro-vtbot/components/ElementCrossing.astro";
-import PointerOnNavigation from "astro-vtbot/components/PointerOnNavigation.astro";
+// import ElementCrossing from "astro-vtbot/components/ElementCrossing.astro";
+// import PointerOnNavigation from "astro-vtbot/components/PointerOnNavigation.astro";
 import Header from "@components/Header.astro";
 import Sidebar from "@components/Sidebar.astro";
 import Footer from "@components/Footer.astro";
@@ -46,8 +46,8 @@ const bannerSubtitle = pageConfig?.subtitle || "";
 >
   <head>
     <ClientRouter />
-    <ElementCrossing />
-    <PointerOnNavigation />
+    <!-- <ElementCrossing /> -->
+    <!-- <PointerOnNavigation /> -->
     <Header
       title={title}
       description={SITE_DESCRIPTION}
@@ -57,7 +57,7 @@ const bannerSubtitle = pageConfig?.subtitle || "";
     <title>{`${title} - ${SITE_TAB}`}</title>
 
     <!-- Umami分析（自建） -->
-    {
+    <!-- {
       umamiConfig.enable && umamiConfig.websiteId && (
         <script
           is:inline
@@ -71,7 +71,7 @@ const bannerSubtitle = pageConfig?.subtitle || "";
       umamiConfig.enable && (
         <script is:inline defer src="/js/umami-share.js"></script>
       )
-    }
+    } -->
 
 
 
@@ -142,9 +142,9 @@ const bannerSubtitle = pageConfig?.subtitle || "";
     </div>
 
 
-    <MobileTOC headings={headings} showTOC={showTOC} />
-    <GlobalAudio />
-    <SakanaWidget />
+    <!-- <MobileTOC headings={headings} showTOC={showTOC} /> -->
+    <!-- <GlobalAudio /> -->
+    <!-- <SakanaWidget /> -->
 
     <!-- 其余脚本保持不变 -->
     <script define:vars={{ SITE_THEME }} is:inline>
@@ -164,7 +164,16 @@ const bannerSubtitle = pageConfig?.subtitle || "";
     </script>
 
     <script is:inline>
-      document.addEventListener("astro:page-load", () => {
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('a')) {
+          console.log('🔗 Link Clicked:', Date.now());
+        }
+      });
+      document.addEventListener('astro:before-preparation', () => console.log('🚀 Before Prep:', Date.now()));
+      document.addEventListener('astro:after-preparation', () => console.log('📦 After Prep:', Date.now()));
+      document.addEventListener('astro:before-swap', () => console.log('🔄 Before Swap:', Date.now()));
+      document.addEventListener('astro:page-load', () => {
+        console.log('✅ Page Loaded:', Date.now());
         document.querySelectorAll(".btn-copy").forEach((button) => {
           button.addEventListener("click", async () => {
             const codeBlock = button.closest(".ryuchan-code");

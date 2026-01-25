@@ -76,10 +76,12 @@ const dateYearMonth = dateObj.format('YYYY / MM');
       <!-- Content Wrapper -->
       <div class="flex flex-col">
         <!-- Preview Area -->
-        <div class="p-6 flex justify-center items-center bg-base-200/50 min-h-[440px]">
+        <div class="px-6 py-0 flex justify-center items-center">
              <!-- Result Image -->
-            <div id="share-result" class="hidden shadow-lg rounded-none overflow-hidden transition-all duration-300 transform scale-100">
-                <img id="generated-card-img" class="block w-[300px] h-[400px] object-contain bg-white" crossorigin="anonymous" />
+            <div id="share-result" class="hidden rounded-none overflow-hidden transition-all duration-300 transform scale-100">
+                <img id="generated-card-img" class="block w-full h-auto object-contain no-fancybox" crossorigin="anonymous" />
+
+
             </div>
             
             <!-- Loading State -->

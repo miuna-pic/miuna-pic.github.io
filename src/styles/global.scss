@@ -332,7 +332,13 @@ code {
 }
 
 .page-content-animate {
-  animation: fade-in-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: fade-in-up 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+// Optimization for View Transitions
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.2s;
 }
 
 @keyframes fadeIn {

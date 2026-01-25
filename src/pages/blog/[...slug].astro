@@ -130,6 +130,9 @@ const url = new URL(`/blog/${blog.slug}`, Astro.url.origin);
       images.forEach((img) => {
         // 如果图片已经在链接中，则跳过
         if (img.closest("a")) return;
+        // 如果图片有 no-fancybox 类，则跳过
+        if (img.classList.contains("no-fancybox")) return;
+
         
         const link = document.createElement("a");
         link.href = (img as HTMLImageElement).src;
