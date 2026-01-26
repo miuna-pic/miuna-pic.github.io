@@ -34,10 +34,14 @@ const { page } = Astro.props as Props;
 const totalPages = Math.ceil(page.total / page.size);
 const pageLinks = generatePageLinks(totalPages);
 
-async function renderContent(content: string) {
-  return await marked.parse(content, {
+async function renderContent(content: string, momentId: string) {
+  const html = await marked.parse(content, {
     breaks: true,
     gfm: true,
+  });
+  // Wrap images in fancybox link
+  return html.replace(/<img[^>]+src="([^"]+)"[^>]*>/g, (match, src) => {
+    return `<a href="${src}" data-fancybox="gallery-${momentId}" class="cursor-zoom-in block rounded-lg overflow-hidden">${match}</a>`;
   });
 }
 ---
@@ -55,7 +59,7 @@ async function renderContent(content: string) {
     <!-- Timeline -->
     <div class="space-y-6">
       {page.data.map(async (moment) => {
-        const htmlContent = await renderContent(moment.content);
+        const htmlContent = await renderContent(moment.content, moment.id);
         return (
           <Card class="p-6 transition-all hover:shadow-lg">
             <div class="flex gap-4">

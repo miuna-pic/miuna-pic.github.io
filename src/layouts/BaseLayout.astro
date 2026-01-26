@@ -14,7 +14,9 @@ import Header from "@components/Header.astro";
 import Sidebar from "@components/Sidebar.astro";
 import Footer from "@components/Footer.astro";
 import Navbar from "@components/Navbar.astro";
+
 import Banner from "@components/Banner.astro";
+import GlobalAudio from "@components/widgets/GlobalAudio.astro";
 
 const {
   title,
@@ -139,7 +141,7 @@ const bannerSubtitle = pageConfig?.subtitle || "";
 
 
     <!-- <MobileTOC headings={headings} showTOC={showTOC} /> -->
-    <!-- <GlobalAudio /> -->
+    <GlobalAudio />
     <!-- <SakanaWidget /> -->
 
     <!-- 其余脚本保持不变 -->
