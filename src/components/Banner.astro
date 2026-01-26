@@ -37,7 +37,7 @@ const useLargeFont =
     currentPath !== "/blog" &&
     !currentPath.includes("/blog/tag/") &&
     !currentPath.includes("/blog/category/"));
-const useTypewriter = pageKey === "home";
+const useTypewriter = currentPath === "/";
 const displayTitle = pageConfig.title || "";
 const displaySubtitle = pageConfig.subtitle || "";
 const hasTitle = displayTitle !== undefined && displayTitle !== "";
