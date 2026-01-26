@@ -127,8 +127,20 @@ user:
         ariaLabel: BiliBili
         title: BiliBili
         svg: ri:bilibili-line
-      - href: https://blog.000.moe/rss.xml
-        ariaLabel: Subscribe via Folo
+      - href: https://steamcommunity.com/profiles/76561199513831368/
+        ariaLabel: Steam
+        title: Steam
+        svg: ri:steam-line
+      - href: fg24680s@gmail.com
+        ariaLabel: Email
+        title: Email
+        svg: ri:mail-line
+      - href: https://t.me/AzusaMoe
+        ariaLabel: Telegram
+        title: Telegram
+        svg: ri:telegram-line
+      - href: /rss.xml
+        ariaLabel: RSS
         title: RSS
         svg: ri:rss-fill
   footer:
@@ -141,10 +153,22 @@ user:
         ariaLabel: BiliBili
         title: BiliBili
         svg: ri:bilibili-line
+      - href: https://steamcommunity.com/profiles/76561199513831368/
+        ariaLabel: Steam
+        title: Steam
+        svg: ri:steam-line
+      - href: fg24680s@gmail.com
+        ariaLabel: Email
+        title: Email
+        svg: ri:mail-line
       - href: https://t.me/AzusaMoe
         ariaLabel: Telegram
         title: Telegram
         svg: ri:telegram-line
+      - href: /rss.xml
+        ariaLabel: RSS
+        title: RSS
+        svg: ri:rss-fill
 comments:
   enable: true
   type: twikoo
