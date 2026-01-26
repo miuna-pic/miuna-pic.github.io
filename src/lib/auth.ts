@@ -85,14 +85,11 @@ export async function hasAuth(): Promise<boolean> {
  * @param manualPrivateKey 可选，手动传入私钥进行验证（不使用缓存/Store中的私钥）
  * @returns GitHub Installation Token
  */
-let lastAutoLoginToastTime = 0;
-
 export async function getAuthToken(manualPrivateKey?: string): Promise<string> {
 	// 1. 如果没有手动传入私钥，先尝试从缓存获取 token
 	if (!manualPrivateKey) {
 		const cachedToken = getTokenFromCache()
 		if (cachedToken) {
-			toast.success('已自动登录', { duration: 1500 })
 			return cachedToken
 		}
 	}
