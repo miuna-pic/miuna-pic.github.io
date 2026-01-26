@@ -17,6 +17,10 @@ import { marked } from "marked";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 import { getSteamGameInfo, extractSteamAppId } from "@utils/steamApi";
 import { getBangumiSubject, extractBangumiId } from "@utils/bangumiApi";
+import { getNeteaseSongInfo, extractNeteaseSongId, formatDuration } from "@utils/neteaseApi";
+import { getBilibiliVideoInfo, extractBilibiliVideoId, formatViewCount, formatVideoDuration } from "@utils/bilibiliApi";
+import { getGitHubRepoInfo, extractGitHubRepo, formatGitHubCount, getLanguageColor } from "@utils/githubApi";
+import { getTMDBMovieInfo, getTMDBTVInfo, extractTMDBId, getTMDBImageUrl, formatTMDBRating, formatRuntime } from "@utils/tmdbApi";
 
 import type { Page } from "astro";
 
@@ -45,6 +49,10 @@ async function renderContent(content: string, momentId: string) {
   // First replace Steam links with placeholders and collect them
   const steamLinks: Array<{ placeholder: string; url: string; appId: string | null }> = [];
   const bangumiLinks: Array<{ placeholder: string; url: string; subjectId: string | null }> = [];
+  const neteaseLinks: Array<{ placeholder: string; url: string; songId: string | null }> = [];
+  const bilibiliLinks: Array<{ placeholder: string; url: string; videoId: { type: 'bv' | 'av', id: string } | null }> = [];
+  const githubLinks: Array<{ placeholder: string; url: string; repo: { owner: string; repo: string } | null }> = [];
+  const tmdbLinks: Array<{ placeholder: string; url: string; mediaId: { type: 'movie' | 'tv'; id: string } | null }> = [];
   let processedContent = content;
   
   // Detect Steam links in markdown format [text](url) or bare URLs
@@ -52,6 +60,18 @@ async function renderContent(content: string, momentId: string) {
   
   // Detect Bangumi links
   const bangumiLinkPattern = /(?:\[([^\]]*)\]\((https?:\/\/(?:bgm|bangumi)\.tv\/subject\/\d+[^\)]*)\)|(https?:\/\/(?:bgm|bangumi)\.tv\/subject\/\d+\S*))/g;
+  
+  // Detect NetEase Cloud Music links
+  const neteaseLinkPattern = /(?:\[([^\]]*)\]\((https?:\/\/(?:y\.)?music\.163\.com[^)]*id=\d+[^\)]*)\)|(https?:\/\/(?:y\.)?music\.163\.com[^\s]*id=\d+\S*))/g;
+  
+  // Detect Bilibili video links
+  const bilibiliLinkPattern = /(?:\[([^\]]*)\]\((https?:\/\/(?:www\.)?bilibili\.com\/video\/(?:BV[a-zA-Z0-9]+|av\d+)[^\)]*)\)|(https?:\/\/(?:www\.)?bilibili\.com\/video\/(?:BV[a-zA-Z0-9]+|av\d+)\S*))/g;
+  
+  // Detect GitHub repository links
+  const githubLinkPattern = /(?:\[([^\]]*)\]\((https?:\/\/(?:www\.)?github\.com\/[^\/)]+\/[^\/)]+[^\)]*)\)|(https?:\/\/(?:www\.)?github\.com\/[^\/)]+\/[^\/)\s]+))/g;
+  
+  // Detect TMDB movie/TV links
+  const tmdbLinkPattern = /(?:\[([^\]]*)\]\((https?:\/\/(?:www\.)?themoviedb\.org\/(?:movie|tv)\/\d+[^\)]*)\)|(https?:\/\/(?:www\.)?themoviedb\.org\/(?:movie|tv)\/\d+\S*))/g;
   
   let match;
   let index = 0;
@@ -79,6 +99,62 @@ async function renderContent(content: string, momentId: string) {
       bangumiLinks.push({ placeholder, url, subjectId });
       processedContent = processedContent.replace(match[0], placeholder);
       bangumiIndex++;
+    }
+  }
+  
+  // Detect NetEase links
+  let neteaseIndex = 0;
+  while ((match = neteaseLinkPattern.exec(content)) !== null) {
+    const url = match[2] || match[3];
+    const songId = extractNeteaseSongId(url);
+    
+    if (songId) {
+      const placeholder = `<!--NETEASECARD${neteaseIndex}-->`;
+      neteaseLinks.push({ placeholder, url, songId });
+      processedContent = processedContent.replace(match[0], placeholder);
+      neteaseIndex++;
+    }
+  }
+  
+  // Detect Bilibili links
+  let bilibiliIndex = 0;
+  while ((match = bilibiliLinkPattern.exec(content)) !== null) {
+    const url = match[2] || match[3];
+    const videoId = extractBilibiliVideoId(url);
+    
+    if (videoId) {
+      const placeholder = `<!--BILIBILICARD${bilibiliIndex}-->`;
+      bilibiliLinks.push({ placeholder, url, videoId });
+      processedContent = processedContent.replace(match[0], placeholder);
+      bilibiliIndex++;
+    }
+  }
+  
+  // Detect GitHub links
+  let githubIndex = 0;
+  while ((match = githubLinkPattern.exec(content)) !== null) {
+    const url = match[2] || match[3];
+    const repo = extractGitHubRepo(url);
+    
+    if (repo) {
+      const placeholder = `<!--GITHUBCARD${githubIndex}-->`;
+      githubLinks.push({ placeholder, url, repo });
+      processedContent = processedContent.replace(match[0], placeholder);
+ githubIndex++;
+    }
+  }
+  
+  // Detect TMDB links
+  let tmdbIndex = 0;
+  while ((match = tmdbLinkPattern.exec(content)) !== null) {
+    const url = match[2] || match[3];
+    const mediaId = extractTMDBId(url);
+    
+    if (mediaId) {
+      const placeholder = `<!--TMDBCARD${tmdbIndex}-->`;
+      tmdbLinks.push({ placeholder, url, mediaId });
+      processedContent = processedContent.replace(match[0], placeholder);
+      tmdbIndex++;
     }
   }
   
@@ -236,6 +312,215 @@ async function renderContent(content: string, momentId: string) {
       `;
       
       html = html.replace(placeholder, bangumiCardHtml);
+    } else {
+      // Fallback to a simple link if data fetch failed
+      html = html.replace(placeholder, `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${url}</a>`);
+    }
+  }
+  
+  // Replace NetEase placeholders with actual cards
+  for (const { placeholder, url, songId } of neteaseLinks) {
+    if (!songId) continue;
+    const songData = await getNeteaseSongInfo(songId);
+    
+    if (songData) {
+      const neteaseUrl = `https://music.163.com/#/song?id=${songId}`;
+      const artistNames = songData.artists.map(a => a.name).join(' / ');
+      const duration = formatDuration(songData.duration);
+      
+      const neteaseCardHtml = `
+        <div class="not-prose netease-card-moment my-4 card bg-base-100 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+          <a href="${neteaseUrl}" target="_blank" rel="noopener noreferrer" class="block" aria-label="Play ${songData.name} on NetEase Cloud Music">
+            <div class="flex items-center gap-4 p-4">
+              <div class="w-20 h-20 rounded-lg overflow-hidden shadow-md shrink-0">
+                <img src="${songData.album.picUrl}" alt="${songData.album.name}" loading="lazy" class="w-full h-full object-cover">
+              </div>
+              <div class="flex-1 min-w-0">
+                <h3 class="font-bold text-base line-clamp-1 mb-1">${songData.name}</h3>
+                <p class="text-sm text-base-content/70 line-clamp-1 mb-1">${artistNames}</p>
+                <p class="text-xs text-base-content/60 line-clamp-1">${songData.album.name}</p>
+              </div>
+              <div class="flex flex-col items-end gap-2 shrink-0">
+                <div class="flex items-center gap-1.5 text-primary">
+                  <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M10,16.5V7.5L16,12M12,13.5L13.5,12.75L12,12V13.5Z"/>
+                  </svg>
+                  <span class="text-xs font-medium">网易云音乐</span>
+                </div>
+                <span class="text-xs text-base-content/60">${duration}</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      `;
+      
+      html = html.replace(placeholder, neteaseCardHtml);
+    } else {
+      // Fallback to a simple link if data fetch failed
+      html = html.replace(placeholder, `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${url}</a>`);
+    }
+  }
+  
+  // Replace Bilibili placeholders with actual cards
+  for (const { placeholder, url, videoId } of bilibiliLinks) {
+    if (!videoId) continue;
+    const videoData = await getBilibiliVideoInfo(videoId);
+    
+    if (videoData) {
+      const bilibiliUrl = `https://www.bilibili.com/video/${videoData.bvid}`;
+      const viewCount = formatViewCount(videoData.stat.view);
+      const duration = formatVideoDuration(videoData.duration);
+      
+      const bilibiliCardHtml = `
+        <div class="not-prose bilibili-card-moment my-4 card bg-base-100 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+          <a href="${bilibiliUrl}" target="_blank" rel="noopener noreferrer" class="block" aria-label="Watch ${videoData.title} on Bilibili">
+            <div class="relative w-full h-48 bg-base-300 overflow-hidden">
+              <img src="${videoData.pic}" alt="${videoData.title}" loading="lazy" class="w-full h-full object-cover" referrerpolicy="no-referrer">
+              <div class="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-white text-xs font-medium">
+                ${duration}
+              </div>
+            </div>
+            <div class="p-4">
+              <h3 class="font-bold text-base line-clamp-2 mb-2">${videoData.title}</h3>
+              <div class="flex items-center gap-2 mb-3">
+                <img src="${videoData.owner.face}" alt="${videoData.owner.name}" class="w-6 h-6 rounded-full" referrerpolicy="no-referrer">
+                <span class="text-sm text-base-content/70">${videoData.owner.name}</span>
+              </div>
+              <div class="flex items-center justify-between text-xs text-base-content/60">
+                <div class="flex items-center gap-4">
+                  <span>▶ ${viewCount}</span>
+                  <span>💬 ${formatViewCount(videoData.stat.danmaku)}</span>
+                </div>
+                <div class="flex items-center gap-1 text-primary">
+                  <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.511.556-2.765 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.658.373-.907l.027-.027c.267-.249.573-.373.92-.373.347 0 .653.124.92.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .16-.213l2.853-2.747c.267-.249.573-.373.92-.373.347 0 .662.151.929.4.267.249.391.551.391.907 0 .355-.124.657-.373.906zM5.333 7.24c-.746.018-1.373.276-1.88.773-.506.498-.769 1.13-.786 1.894v7.52c.017.764.28 1.395.786 1.893.507.498 1.134.756 1.88.773h13.334c.746-.017 1.373-.275 1.88-.773.506-.498.769-1.129.786-1.893v-7.52c-.017-.765-.28-1.396-.786-1.894-.507-.497-1.134-.755-1.88-.773zM8 11.107c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c.017-.391.15-.711.4-.96.249-.249.56-.373.933-.373zm8 0c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c.017-.391.15-.711.4-.96.249-.249.56-.373.933-.373z"/>
+                  </svg>
+                  <span class="font-medium">哔哩哔哩</span>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      `;
+      
+      html = html.replace(placeholder, bilibiliCardHtml);
+    } else {
+      // Fallback to a simple link if data fetch failed
+      html = html.replace(placeholder, `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${url}</a>`);
+    }
+  }
+  
+  // Replace GitHub placeholders with actual cards
+  for (const { placeholder, url, repo } of githubLinks) {
+    if (!repo) continue;
+    const repoData = await getGitHubRepoInfo(repo.owner, repo.repo);
+    
+    if (repoData) {
+      const stars = formatGitHubCount(repoData.stargazers_count);
+      const forks = formatGitHubCount(repoData.forks_count);
+      const languageColor = getLanguageColor(repoData.language);
+      
+      const githubCardHtml = `
+        <div class="not-prose github-card-moment my-4 card bg-base-100 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+          <a href="${repoData.html_url}" target="_blank" rel="noopener noreferrer" class="block" aria-label="View ${repoData.full_name} on GitHub">
+            <div class="p-4">
+              <div class="flex items-start gap-3 mb-3">
+                <svg class="w-5 h-5 flex-shrink-0 mt-0.5" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-bold text-base mb-1">${repoData.full_name}</h3>
+                  <p class="text-sm text-base-content/70 line-clamp-2">${repoData.description || '无描述'}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-4 text-xs text-base-content/60">
+                ${repoData.language ? `
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded-full" style="background-color: ${languageColor}"></span>
+                    <span>${repoData.language}</span>
+                  </div>
+                ` : ''}
+                <div class="flex items-center gap-1">
+                  <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"/>
+                  </svg>
+                  <span>${stars}</span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75v-.878a2.25 2.25 0 111.5 0v.878a2.25 2.25 0 01-2.25 2.25h-1.5v2.128a2.251 2.251 0 11-1.5 0V8.5h-1.5A2.25 2.25 0 013.5 6.25v-.878a2.25 2.25 0 111.5 0zM5 3.25a.75.75 0 100-1.5.75.75 0 000 1.5zm6 0a.75.75 0 100-1.5.75.75 0 000 1.5zm-3 9.5a.75.75 0 100-1.5.75.75 0 000 1.5z"/>
+                  </svg>
+                  <span>${forks}</span>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      `;
+      
+      html = html.replace(placeholder, githubCardHtml);
+    } else {
+      // Fallback to a simple link if data fetch failed
+      html = html.replace(placeholder, `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${url}</a>`);
+    }
+  }
+  
+  // Replace TMDB placeholders with actual cards
+  for (const { placeholder, url, mediaId } of tmdbLinks) {
+    if (!mediaId) continue;
+    
+    const mediaData = mediaId.type === 'movie' 
+      ? await getTMDBMovieInfo(mediaId.id)
+      : await getTMDBTVInfo(mediaId.id);
+    
+    if (mediaData) {
+      const title = 'title' in mediaData ? mediaData.title : mediaData.name;
+      const originalTitle = 'original_title' in mediaData ? mediaData.original_title : mediaData.original_name;
+      const releaseDate = 'release_date' in mediaData ? mediaData.release_date : mediaData.first_air_date;
+      const year = releaseDate ? new Date(releaseDate).getFullYear() : '未知';
+      const rating = formatTMDBRating(mediaData.vote_average);
+      const posterUrl = getTMDBImageUrl(mediaData.poster_path);
+      const genres = mediaData.genres.slice(0, 3).map(g => g.name).join(' / ');
+      const mediaType = mediaId.type === 'movie' ? '电影' : '剧集';
+      const extraInfo = mediaId.type === 'movie' && 'runtime' in mediaData
+        ? formatRuntime(mediaData.runtime)
+        : `${(mediaData as any).number_of_seasons} 季`;
+      
+      const tmdbCardHtml = `
+        <div class="not-prose tmdb-card-moment my-4 card bg-base-100 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+          <a href="${url}" target="_blank" rel="noopener noreferrer" class="block" aria-label="View ${title} on TMDB">
+            <div class="flex gap-4 p-4">
+              <div class="w-32 h-48 rounded-lg overflow-hidden shadow-md shrink-0 bg-base-300">
+                <img src="${posterUrl}" alt="${title}" loading="lazy" class="w-full h-full object-cover" referrerpolicy="no-referrer">
+              </div>
+              <div class="flex-1 min-w-0 flex flex-col">
+                <div class="mb-2">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="badge badge-primary badge-sm">${mediaType}</span>
+                    <span class="text-xs text-base-content/60">${year}</span>
+                  </div>
+                  <h3 class="font-bold text-base line-clamp-1 mb-1">${title}</h3>
+                  ${originalTitle !== title ? `<p class="text-xs text-base-content/60 line-clamp-1 mb-2">${originalTitle}</p>` : ''}
+                </div>
+                <p class="text-sm text-base-content/70 line-clamp-3 mb-auto">${mediaData.overview || '暂无简介'}</p>
+                <div class="flex items-center gap-4 text-xs text-base-content/60 mt-3">
+                  <div class="flex items-center gap-1">
+                    <svg class="w-4 h-4 text-yellow-500" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    <span class="font-medium">${rating}</span>
+                    <span>(${mediaData.vote_count})</span>
+                  </div>
+                  ${genres ? `<span>${genres}</span>` : ''}
+                  <span>${extraInfo}</span>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      `;
+      
+      html = html.replace(placeholder, tmdbCardHtml);
     } else {
       // Fallback to a simple link if data fetch failed
       html = html.replace(placeholder, `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${url}</a>`);

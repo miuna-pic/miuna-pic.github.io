@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Toaster, toast } from 'sonner';
+import 'sonner/dist/styles.css';
 
 export default function GlobalToaster() {
     useEffect(() => {
@@ -29,10 +30,16 @@ export default function GlobalToaster() {
                     background: 'var(--fallback-b1,oklch(var(--b1)/1))',
                     color: 'var(--fallback-bc,oklch(var(--bc)/1))',
                     border: '1px solid var(--fallback-b2,oklch(var(--b2)/1))',
+                    minWidth: '320px',
+                    maxWidth: '420px',
+                    padding: '16px',
+                    borderRadius: '12px',
                 },
                 classNames: {
+                    toast: 'flex items-start gap-3',
                     title: 'text-base font-bold',
                     description: 'text-sm opacity-90',
+                    closeButton: 'bg-base-200 hover:bg-base-300',
                 }
             }}
         />
