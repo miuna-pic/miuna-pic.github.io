@@ -11,7 +11,7 @@ const initialSong = musicList[0] || {};
     <!-- 迷你播放器容器，只在非音乐页面显示 -->
     <div id="mini-player-container" class="fixed bottom-8 left-8 z-[999] flex flex-col items-start gap-4 pointer-events-none opacity-0 transition-opacity duration-300">
         <!-- 展开的卡片 -->
-        <div id="mini-player-card" class="bg-neu-base/90 dark:bg-[#1a1a1a]/90 backdrop-blur-md p-4 rounded-3xl shadow-neu-out border border-white/20 dark:border-white/10 w-64 translate-y-4 opacity-0 scale-95 transition-all duration-300 origin-bottom-left pointer-events-auto">
+        <div id="mini-player-card" class="bg-neu-base/90 dark:bg-[#1a1a1a]/90 backdrop-blur-md p-4 rounded-3xl shadow-neu-out border border-white/20 dark:border-white/10 w-64 translate-y-4 opacity-0 scale-95 transition-all duration-300 origin-bottom-left pointer-events-none">
             <div class="flex gap-4">
                 <div class="w-16 h-16 rounded-xl overflow-hidden shadow-md shrink-0">
                     <img id="mini-cover" src={initialSong.cover || "/favicon.svg"} class="w-full h-full object-cover" alt="cover"/>
