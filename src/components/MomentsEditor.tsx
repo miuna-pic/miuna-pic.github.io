@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { showToast as toast } from './GlobalToaster';
+import { showToast as toast } from '@/components/GlobalToaster';
 import { Loader2, Image as ImageIcon, Send, X } from 'lucide-react';
 import { putFile, readTextFileFromRepo, toBase64Utf8 } from '@/lib/github-client';
 import { readFileAsText } from '@/lib/file-utils';

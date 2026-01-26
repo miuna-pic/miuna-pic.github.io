@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { Archive, BookOpen, Calendar, Trash2, X } from 'lucide-react';
 import dayjs from 'dayjs';
-import { showToast as toast } from './GlobalToaster';
+import { showToast as toast } from '@/components/GlobalToaster';
 import { useAuthStore } from '@/components/write/hooks/use-auth';
 import { batchDeleteBlogs } from '@/components/write/services/batch-delete';
 import { readFileAsText } from '@/lib/file-utils';

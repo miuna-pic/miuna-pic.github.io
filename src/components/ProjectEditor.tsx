@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { showToast as toast } from './GlobalToaster';
+import { showToast as toast } from '@/components/GlobalToaster';
 import { Loader2, Plus, GripVertical, Trash2, X } from 'lucide-react';
 import { putFile, readTextFileFromRepo, toBase64Utf8 } from '@/lib/github-client';
 import { useAuthStore } from '@/components/write/hooks/use-auth';
