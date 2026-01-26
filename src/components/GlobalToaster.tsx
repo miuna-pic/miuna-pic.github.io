@@ -27,10 +27,12 @@ export default function GlobalToaster() {
 
         // 监听 Astro 的视图转换事件
         document.addEventListener('astro:before-swap', handleClearToasts);
+        document.addEventListener('astro:after-swap', handleClearToasts);
 
         return () => {
             window.removeEventListener('app:toast', handleGlobalToast);
             document.removeEventListener('astro:before-swap', handleClearToasts);
+            document.removeEventListener('astro:after-swap', handleClearToasts);
         };
     }, []);
 

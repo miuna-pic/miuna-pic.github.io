@@ -88,7 +88,6 @@ export async function getAuthToken(manualPrivateKey?: string): Promise<string> {
 	if (!manualPrivateKey) {
 		const cachedToken = getTokenFromCache()
 		if (cachedToken) {
-			toast.info('正在使用缓存令牌...')
 			return cachedToken
 		}
 	}
@@ -99,13 +98,10 @@ export async function getAuthToken(manualPrivateKey?: string): Promise<string> {
 		throw new Error('需要先设置私钥。请先导入 PEM 密钥。')
 	}
 
-	toast.info('正在签发 JWT...')
 	const jwt = signAppJwt(GITHUB_CONFIG.APP_ID, privateKey)
 
-	toast.info('正在获取安装信息...')
 	const installationId = await getInstallationId(jwt, GITHUB_CONFIG.OWNER, GITHUB_CONFIG.REPO)
 
-	toast.info('正在创建安装令牌...')
 	const token = await createInstallationToken(jwt, installationId)
 
 	// 只有在非手动验证的情况下才保存到缓存
