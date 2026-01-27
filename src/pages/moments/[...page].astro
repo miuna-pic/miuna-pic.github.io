@@ -21,6 +21,9 @@ import { getNeteaseSongInfo, extractNeteaseSongId, formatDuration } from "@utils
 import { getBilibiliVideoInfo, extractBilibiliVideoId, formatViewCount, formatVideoDuration } from "@utils/bilibiliApi";
 import { getGitHubRepoInfo, extractGitHubRepo, formatGitHubCount, getLanguageColor } from "@utils/githubApi";
 import { getTMDBMovieInfo, getTMDBTVInfo, extractTMDBId, getTMDBImageUrl, formatTMDBRating, formatRuntime } from "@utils/tmdbApi";
+import { getYouTubeVideoInfo, extractYouTubeVideoId, formatYouTubeCount, parseYouTubeDuration, getYouTubeThumbnail } from "@utils/youtubeApi";
+import { getTikTokVideoInfo, extractTikTokId, getTikTokUrl } from "@utils/tiktokApi";
+import { getVNDBInfo, extractVNDBId, getVNDBUrl, formatVNDBRating, getVNDBLengthLabel } from "@utils/vndbApi";
 
 import type { Page } from "astro";
 
@@ -53,6 +56,9 @@ async function renderContent(content: string, momentId: string) {
   const bilibiliLinks: Array<{ placeholder: string; url: string; videoId: { type: 'bv' | 'av', id: string } | null }> = [];
   const githubLinks: Array<{ placeholder: string; url: string; repo: { owner: string; repo: string } | null }> = [];
   const tmdbLinks: Array<{ placeholder: string; url: string; mediaId: { type: 'movie' | 'tv'; id: string } | null }> = [];
+  const youtubeLinks: Array<{ placeholder: string; url: string; videoId: string | null }> = [];
+  const tiktokLinks: Array<{ placeholder: string; url: string; videoInfo: any | null }> = [];
+  const vndbLinks: Array<{ placeholder: string; url: string; vnId: string | null }> = [];
   let processedContent = content;
   
   // Detect Steam links in markdown format [text](url) or bare URLs
@@ -72,6 +78,15 @@ async function renderContent(content: string, momentId: string) {
   
   // Detect TMDB movie/TV links
   const tmdbLinkPattern = /(?:\[([^\]]*)\]\((https?:\/\/(?:www\.)?themoviedb\.org\/(?:movie|tv)\/\d+[^\)]*)\)|(https?:\/\/(?:www\.)?themoviedb\.org\/(?:movie|tv)\/\d+\S*))/g;
+  
+  // Detect YouTube video links
+  const youtubeLinkPattern = /(?:\[([^\]]*)\]\((https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[^\)]*)\)|(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?[^\s]*v=[a-zA-Z0-9_-]{11}|youtu\.be\/[a-zA-Z0-9_-]{11})\S*))/g;
+  
+  // Detect TikTok video links
+  const tiktokLinkPattern = /(?:\[([^\]]*)\]\((https?:\/\/(?:www\.|vm\.)?tiktok\.com\/[^\)]+)\)|(https?:\/\/(?:www\.|vm\.)?tiktok\.com\/\S+))/g;
+  
+  // Detect VNDB visual novel links
+  const vndbLinkPattern = /(?:\[([^\]]*)\]\((https?:\/\/(?:www\.)?vndb\.org\/v\d+[^\)]*)\)|(https?:\/\/(?:www\.)?vndb\.org\/v\d+\S*))/g;
   
   let match;
   let index = 0;
@@ -155,6 +170,34 @@ async function renderContent(content: string, momentId: string) {
       tmdbLinks.push({ placeholder, url, mediaId });
       processedContent = processedContent.replace(match[0], placeholder);
       tmdbIndex++;
+    }
+  }
+  
+  // Detect TikTok links
+  let tiktokIndex = 0;
+  while ((match = tiktokLinkPattern.exec(content)) !== null) {
+    const url = match[2] || match[3];
+    const videoInfo = extractTikTokId(url);
+    
+    if (videoInfo) {
+      const placeholder = `<!--TIKTOKCARD${tiktokIndex}-->`;
+      tiktokLinks.push({ placeholder, url, videoInfo });
+      processedContent = processedContent.replace(match[0], placeholder);
+      tiktokIndex++;
+    }
+  }
+  
+  // Detect VNDB links
+  let vndbIndex = 0;
+  while ((match = vndbLinkPattern.exec(content)) !== null) {
+    const url = match[2] || match[3];
+    const vnId = extractVNDBId(url);
+    
+    if (vnId) {
+      const placeholder = `<!--VNDBCARD${vndbIndex}-->`;
+      vndbLinks.push({ placeholder, url, vnId });
+      processedContent = processedContent.replace(match[0], placeholder);
+      vndbIndex++;
     }
   }
   
@@ -527,6 +570,43 @@ async function renderContent(content: string, momentId: string) {
     }
   }
   
+  // Replace TikTok placeholders with cards
+  for (const { placeholder, url, videoInfo } of tiktokLinks) {
+    if (!videoInfo) continue;
+    
+    const videoData = await getTikTokVideoInfo(url);
+    
+    if (videoData) {
+      const tiktokCardHtml = `<div class="not-prose tiktok-card-moment my-4 card bg-base-100 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"><a href="${url}" target="_blank" rel="noopener noreferrer" class="block" aria-label="View ${videoData.title} on TikTok"><div class="flex gap-4 p-4"><div class="w-32 h-40 rounded-lg overflow-hidden shadow-md shrink-0 bg-base-300"><img src="${videoData.thumbnail_url}" alt="${videoData.title}" loading="lazy" class="w-full h-full object-cover"></div><div class="flex-1 min-w-0 flex flex-col"><div class="mb-2"><div class="flex items-center gap-2 mb-1"><span class="badge badge-error badge-sm font-medium">TikTok</span><span class="text-xs text-base-content/60">@${videoData.author_name}</span></div><h3 class="font-bold text-base line-clamp-2 mb-1">${videoData.title}</h3></div><div class="mt-auto"><div class="flex items-center gap-2 text-primary text-sm"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg><span>在 TikTok 上观看</span></div></div></div></div></a></div>`;
+      
+      html = html.replace(placeholder, tiktokCardHtml);
+    } else {
+      // Fallback to a simple link
+      html = html.replace(placeholder, `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${url}</a>`);
+    }
+  }
+  
+  // Replace VNDB placeholders with cards
+  for (const { placeholder, url, vnId } of vndbLinks) {
+    if (!vnId) continue;
+    
+    const vnData = await getVNDBInfo(vnId);
+    
+    if (vnData) {
+      const rating = vnData.rating ? formatVNDBRating(vnData.rating) : 'N/A';
+      const length = getVNDBLengthLabel(vnData.length);
+      const developer = vnData.developers && vnData.developers.length > 0 ? vnData.developers[0].name : 'Unknown';
+      const imageUrl = vnData.image?.url || '';
+      
+      const vndbCardHtml = `<div class="not-prose vndb-card-moment my-4 card bg-base-100 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"><a href="${url}" target="_blank" rel="noopener noreferrer" class="block" aria-label="View ${vnData.title} on VNDB"><div class="flex gap-4 p-4"><div class="w-32 h-44 rounded-lg overflow-hidden shadow-md shrink-0 bg-base-300">${imageUrl ? `<img src="${imageUrl}" alt="${vnData.title}" loading="lazy" class="w-full h-full object-cover">` : '<div class="w-full h-full flex items-center justify-center text-base-content/30"><svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>'}</div><div class="flex-1 min-w-0 flex flex-col"><div class="mb-2"><div class="flex items-center gap-2 mb-1"><span class="badge badge-info badge-sm font-medium">VNDB</span><span class="text-xs text-base-content/60">${developer}</span></div><h3 class="font-bold text-base line-clamp-2 mb-1">${vnData.title}</h3>${vnData.alttitle ? `<p class="text-sm text-base-content/60 line-clamp-1">${vnData.alttitle}</p>` : ''}</div><div class="mt-auto space-y-1"><div class="flex items-center gap-3 text-sm"><div class="flex items-center gap-1"><svg class="w-4 h-4 text-warning" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span class="font-medium">${rating}</span></div><div class="text-base-content/60">•</div><div class="text-base-content/60">${length}</div></div><div class="flex items-center gap-2 text-primary text-sm"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg><span>在 VNDB 上查看</span></div></div></div></div></a></div>`;
+      
+      html = html.replace(placeholder, vndbCardHtml);
+    } else {
+      // Fallback to a simple link
+      html = html.replace(placeholder, `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${url}</a>`);
+    }
+  }
+  
   return html;
 }
 ---
@@ -628,4 +708,49 @@ async function renderContent(content: string, momentId: string) {
       } as any);
     });
   </script>
+
+  <style>
+    /* Ensure cards don't overflow on mobile */
+    .steam-card-moment,
+    .bangumi-card-moment,
+    .netease-card-moment,
+    .bilibili-card-moment,
+    .github-card-moment,
+    .tmdb-card-moment,
+    .tiktok-card-moment,
+    .vndb-card-moment {
+      max-width: 100%;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* Ensure images don't overflow */
+    .steam-card-moment img,
+    .bangumi-card-moment img,
+    .netease-card-moment img,
+    .bilibili-card-moment img,
+    .github-card-moment img,
+    .tmdb-card-moment img,
+    .tiktok-card-moment img,
+    .vndb-card-moment img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 640px) {
+      .steam-card-moment,
+      .bangumi-card-moment,
+      .netease-card-moment,
+      .bilibili-card-moment,
+      .github-card-moment,
+      .tmdb-card-moment,
+      .tiktok-card-moment,
+      .vndb-card-moment {
+        margin-left: 0;
+        margin-right: 0;
+      }
+    }
+  </style>
 </BaseLayout>
