@@ -19,6 +19,7 @@ import Navbar from "@components/Navbar.astro";
 import Banner from "@components/Banner.astro";
 import GlobalAudio from "@components/widgets/GlobalAudio.astro";
 import SakanaWidget from "@components/widgets/SakanaWidget.astro";
+import ScrollToTop from "@components/widgets/ScrollToTop.astro";
 import GlobalToaster from "@components/GlobalToaster";
 
 const {
@@ -138,6 +139,7 @@ const bannerSubtitle = pageConfig?.subtitle || "";
     <!-- <MobileTOC headings={headings} showTOC={showTOC} /> -->
     <GlobalAudio />
     <SakanaWidget />
+    <ScrollToTop />
 
     <!-- 其余脚本保持不变 -->
     <GlobalToaster client:only="react" />
