@@ -17,23 +17,38 @@ const { envId } = Astro.props;
 <script is:inline define:vars={{ envId }}>
   function initTwikoo() {
     const container = document.getElementById('tcomment');
-    if (!container || container.classList.contains('twikoo-init')) return;
-
-    if (typeof twikoo !== 'undefined') {
-      twikoo.init({
-        envId: envId,
-        el: '#tcomment',
-      });
-      container.classList.add('twikoo-init');
+    if (!container) return;
+    
+    // 如果已初始化，先清空再重新初始化
+    if (container.classList.contains('twikoo-init')) {
+      container.innerHTML = '';
+      container.classList.remove('twikoo-init');
     }
+
+    // 等待 twikoo 库加载
+    function tryInit() {
+      if (typeof twikoo !== 'undefined') {
+        twikoo.init({
+          envId: envId,
+          el: '#tcomment',
+        });
+        container.classList.add('twikoo-init');
+      } else {
+        // 库还没加载，等待后重试
+        setTimeout(tryInit, 100);
+      }
+    }
+    
+    tryInit();
   }
 
-  // 视图转换兼容 - 移除 once: true，通过 class 防止重复初始化
   // 初始加载时初始化
   initTwikoo();
   
-  // swup 页面切换后重新初始化
-  document.addEventListener('swup:contentReplaced', initTwikoo);
+  // 防止重复注册事件监听器
+  if (!window.__twikooSwupListenerRegistered) {
+    window.__twikooSwupListenerRegistered = true;
+    // swup 页面切换后重新初始化
+    document.addEventListener('swup:contentReplaced', initTwikoo);
+  }
 </script>
-
-

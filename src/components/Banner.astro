@@ -249,10 +249,14 @@ const initialRandomImage = `${RANDOM_API_URL}?t=${Date.now()}`;
       initBanner();
     }
     
-    // swup 页面切换前清理
-    document.addEventListener("swup:willReplaceContent", cleanupTypewriter);
-    // swup 页面切换后重新初始化
-    document.addEventListener("swup:contentReplaced", initBanner);
+    // 防止重复注册事件监听器
+    if (!window.__bannerSwupListenersRegistered) {
+      window.__bannerSwupListenersRegistered = true;
+      // swup 页面切换前清理
+      document.addEventListener("swup:willReplaceContent", cleanupTypewriter);
+      // swup 页面切换后重新初始化
+      document.addEventListener("swup:contentReplaced", initBanner);
+    }
   })();
 </script>
 

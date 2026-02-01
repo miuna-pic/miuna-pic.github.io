@@ -483,7 +483,7 @@ const averageRating = ratedItems.length > 0
 
   <script>
     // 客户端筛选逻辑
-    document.addEventListener('astro:page-load', () => {
+    function initAnimePage() {
       const searchInput = document.getElementById('search-input') as HTMLInputElement;
       
       let currentTypeValue = 'all';
@@ -667,6 +667,12 @@ const averageRating = ratedItems.length > 0
       
       // 初始排序
       filterAndSort();
-    });
+    }
+
+    // 初始加载时调用
+    initAnimePage();
+    
+    // swup 页面切换后重新初始化
+    document.addEventListener('swup:contentReplaced', initAnimePage);
   </script>
 </BaseLayout>
