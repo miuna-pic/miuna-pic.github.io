@@ -3,6 +3,7 @@ import { USER_AVATAR, USER_SIDEBAR_SOCIAL_ICONS, umamiConfig, USER_DESCRIPTION, 
 import { Icon } from "astro-icon/components";   
 import { Image } from "astro:assets";  
 import { getAllPosts, getCategoriesWithPosts, getTagsWithCount } from "@utils/blogUtils";  
+import CalendarBar from "./CalendarBar.astro";  
   
 // 获取所有博客文章和分类信息  
 const allPosts = await getAllPosts();  
@@ -146,7 +147,12 @@ const getCategoryDisplayName = (category: string): string => {
     )}
   </div>  
 </div>  
-  
+
+<!-- 日历 -->
+<div class="mb-4">
+  <CalendarBar />
+</div>
+
 <!-- 第二个盒子：分类列表 -->  
 <div class="card-base p-3 mb-4">  
   <div class="font-bold transition text-lg text-base-content relative ml-4 mb-2 before:w-1 before:h-4 before:rounded-md before:bg-primary before:absolute before:left-[-16px] before:top-[5.5px]">  

@@ -219,6 +219,35 @@ const themes = [
       </details>
     </li>
 
+    <!-- Extra Features -->
+    <li>
+      <details>
+        <summary class="font-medium flex justify-between items-center p-2 hover:bg-base-300 rounded-lg w-full">
+          <div class="flex items-center gap-2">
+            <Icon name="material-symbols:auto-awesome" class="w-5 h-5" />
+            Extra Features
+          </div>
+        </summary>
+        <div class="p-2 bg-base-100 rounded-box flex flex-col gap-2">
+          <!-- Snowflakes Toggle -->
+          <div class="flex justify-between items-center px-1">
+            <span class="text-sm">Snowflakes</span>
+            <input type="checkbox" id="mobile-toggle-snowflakes" class="toggle toggle-primary toggle-sm" />
+          </div>
+          <!-- FPS Counter Toggle -->
+          <div class="flex justify-between items-center px-1">
+            <span class="text-sm">FPS Counter</span>
+            <input type="checkbox" id="mobile-toggle-fps" class="toggle toggle-primary toggle-sm" />
+          </div>
+          <!-- Heart Click Toggle -->
+          <div class="flex justify-between items-center px-1">
+            <span class="text-sm">Heart Click</span>
+            <input type="checkbox" id="mobile-toggle-heart" class="toggle toggle-primary toggle-sm" />
+          </div>
+        </div>
+      </details>
+    </li>
+
     <!-- Anime Trace Tool -->
     <li>
       <details>
@@ -751,6 +780,192 @@ const themes = [
                 mTraceBtn.disabled = false;
                 mTraceBtn.textContent = 'Search';
             }
+        });
+    }
+
+    // ===== Extra Features =====
+    const STORAGE_SNOWFLAKES = 'extra-snowflakes';
+    const STORAGE_FPS = 'extra-fps';
+    const STORAGE_HEART = 'extra-heart';
+    
+    const mToggleSnowflakes = document.getElementById('mobile-toggle-snowflakes');
+    const mToggleFps = document.getElementById('mobile-toggle-fps');
+    const mToggleHeart = document.getElementById('mobile-toggle-heart');
+    
+    // Snowflakes Feature
+    let mSnowflakesInstance = null;
+    let mSnowflakesStyleEl = null;
+    let mSnowflakesAnimationId = null;
+    
+    function mStartSnowflakes() {
+        if (mSnowflakesInstance) return;
+        if (!document.getElementById('snowflakes-style')) {
+            mSnowflakesStyleEl = document.createElement('style');
+            mSnowflakesStyleEl.id = 'snowflakes-style';
+            mSnowflakesStyleEl.textContent = `.snowflake{position:fixed;color:#fff;font-size:1em;top:-20px;z-index:99999;pointer-events:none;user-select:none;text-shadow:0 0 5px rgba(255,255,255,0.7);animation:snowfall linear forwards}@keyframes snowfall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(360deg);opacity:0.3}}`;
+            document.head.appendChild(mSnowflakesStyleEl);
+        }
+        const snowflakes = ['❄', '❅', '❆', '✻', '✼'];
+        mSnowflakesInstance = [];
+        function createSnowflake() {
+            const el = document.createElement('div');
+            el.className = 'snowflake';
+            el.textContent = snowflakes[Math.floor(Math.random() * snowflakes.length)];
+            el.style.left = Math.random() * 100 + 'vw';
+            el.style.fontSize = (Math.random() * 15 + 10) + 'px';
+            el.style.animationDuration = (Math.random() * 5 + 5) + 's';
+            el.style.opacity = Math.random() * 0.5 + 0.5;
+            document.body.appendChild(el);
+            mSnowflakesInstance.push(el);
+            el.addEventListener('animationend', () => {
+                el.remove();
+                const idx = mSnowflakesInstance.indexOf(el);
+                if (idx > -1) mSnowflakesInstance.splice(idx, 1);
+            });
+        }
+        for (let i = 0; i < 10; i++) setTimeout(() => createSnowflake(), i * 300);
+        mSnowflakesAnimationId = setInterval(createSnowflake, 800);
+    }
+    
+    function mStopSnowflakes() {
+        if (mSnowflakesAnimationId) { clearInterval(mSnowflakesAnimationId); mSnowflakesAnimationId = null; }
+        if (mSnowflakesInstance) { mSnowflakesInstance.forEach(el => el.remove()); mSnowflakesInstance = null; }
+        if (mSnowflakesStyleEl) { mSnowflakesStyleEl.remove(); mSnowflakesStyleEl = null; }
+    }
+    
+    // FPS Counter Feature
+    let mFpsEl = null;
+    let mFpsStyleEl = null;
+    let mFpsRunning = false;
+    let mFpsFrames = 0;
+    let mFpsLastTime = 0;
+    
+    function mStartFps() {
+        if (mFpsRunning) return;
+        mFpsRunning = true;
+        if (!document.getElementById('fps-style')) {
+            mFpsStyleEl = document.createElement('style');
+            mFpsStyleEl.id = 'fps-style';
+            mFpsStyleEl.textContent = `#fps-counter{position:fixed;top:5px;left:8px;z-index:999999;font-family:'Courier New',Courier,monospace;font-size:14px;font-weight:bold;color:#00ff00;text-shadow:1px 1px 2px #000000;pointer-events:none;user-select:none}`;
+            document.head.appendChild(mFpsStyleEl);
+        }
+        if (!document.getElementById('fps-counter')) {
+            mFpsEl = document.createElement('div');
+            mFpsEl.id = 'fps-counter';
+            mFpsEl.textContent = 'FPS: --';
+            document.body.appendChild(mFpsEl);
+        } else {
+            mFpsEl = document.getElementById('fps-counter');
+        }
+        mFpsFrames = 0;
+        mFpsLastTime = performance.now();
+        function fpsLoop() {
+            if (!mFpsRunning) return;
+            const now = performance.now();
+            mFpsFrames++;
+            if (now - mFpsLastTime >= 1000) {
+                const fps = Math.round((mFpsFrames * 1000) / (now - mFpsLastTime));
+                if (mFpsEl) mFpsEl.textContent = 'FPS: ' + fps;
+                mFpsFrames = 0;
+                mFpsLastTime = now;
+            }
+            requestAnimationFrame(fpsLoop);
+        }
+        fpsLoop();
+    }
+    
+    function mStopFps() {
+        mFpsRunning = false;
+        if (mFpsEl) { mFpsEl.remove(); mFpsEl = null; }
+        if (mFpsStyleEl) { mFpsStyleEl.remove(); mFpsStyleEl = null; }
+    }
+    
+    // Heart Click Feature
+    let mHeartStyleEl = null;
+    let mHeartEnabled = false;
+    let mHeartAnimationId = null;
+    let mHearts = [];
+    
+    function mStartHeart() {
+        if (mHeartEnabled) return;
+        mHeartEnabled = true;
+        if (!document.getElementById('heart-style')) {
+            mHeartStyleEl = document.createElement('style');
+            mHeartStyleEl.id = 'heart-style';
+            mHeartStyleEl.textContent = `.heart{width:10px;height:10px;position:fixed;background:#f00;transform:rotate(45deg);pointer-events:none;z-index:99999}.heart:after,.heart:before{content:'';width:inherit;height:inherit;background:inherit;border-radius:50%;position:fixed}.heart:after{top:-5px}.heart:before{left:-5px}`;
+            document.head.appendChild(mHeartStyleEl);
+        }
+        function getRandomColor() {
+            return 'rgb(' + ~~(255 * Math.random()) + ',' + ~~(255 * Math.random()) + ',' + ~~(255 * Math.random()) + ')';
+        }
+        function heartLoop() {
+            if (!mHeartEnabled) return;
+            for (let i = 0; i < mHearts.length; i++) {
+                if (mHearts[i].alpha <= 0) {
+                    mHearts[i].el.remove();
+                    mHearts.splice(i, 1);
+                    i--;
+                } else {
+                    mHearts[i].y--;
+                    mHearts[i].scale += 0.004;
+                    mHearts[i].alpha -= 0.013;
+                    mHearts[i].el.style.cssText = 'left:' + mHearts[i].x + 'px;top:' + mHearts[i].y + 'px;opacity:' + mHearts[i].alpha + ';transform:scale(' + mHearts[i].scale + ',' + mHearts[i].scale + ') rotate(45deg);background:' + mHearts[i].color + ';z-index:99999;';
+                }
+            }
+            mHeartAnimationId = requestAnimationFrame(heartLoop);
+        }
+        function createHeart(e) {
+            if (!mHeartEnabled) return;
+            const el = document.createElement('div');
+            el.className = 'heart';
+            mHearts.push({ el: el, x: e.clientX - 5, y: e.clientY - 5, scale: 1, alpha: 1, color: getRandomColor() });
+            document.body.appendChild(el);
+        }
+        window.__heartClickHandler = createHeart;
+        document.addEventListener('click', window.__heartClickHandler);
+        heartLoop();
+    }
+    
+    function mStopHeart() {
+        mHeartEnabled = false;
+        if (mHeartAnimationId) { cancelAnimationFrame(mHeartAnimationId); mHeartAnimationId = null; }
+        if (window.__heartClickHandler) { document.removeEventListener('click', window.__heartClickHandler); window.__heartClickHandler = null; }
+        mHearts.forEach(h => h.el.remove());
+        mHearts = [];
+        if (mHeartStyleEl) { mHeartStyleEl.remove(); mHeartStyleEl = null; }
+    }
+    
+    // Initialize mobile toggles
+    if (mToggleSnowflakes) {
+        const saved = localStorage.getItem(STORAGE_SNOWFLAKES) === 'true';
+        mToggleSnowflakes.checked = saved;
+        if (saved) mStartSnowflakes();
+        mToggleSnowflakes.addEventListener('change', () => {
+            const enabled = mToggleSnowflakes.checked;
+            localStorage.setItem(STORAGE_SNOWFLAKES, enabled);
+            if (enabled) mStartSnowflakes(); else mStopSnowflakes();
+        });
+    }
+    
+    if (mToggleFps) {
+        const saved = localStorage.getItem(STORAGE_FPS) === 'true';
+        mToggleFps.checked = saved;
+        if (saved) mStartFps();
+        mToggleFps.addEventListener('change', () => {
+            const enabled = mToggleFps.checked;
+            localStorage.setItem(STORAGE_FPS, enabled);
+            if (enabled) mStartFps(); else mStopFps();
+        });
+    }
+    
+    if (mToggleHeart) {
+        const saved = localStorage.getItem(STORAGE_HEART) === 'true';
+        mToggleHeart.checked = saved;
+        if (saved) mStartHeart();
+        mToggleHeart.addEventListener('change', () => {
+            const enabled = mToggleHeart.checked;
+            localStorage.setItem(STORAGE_HEART, enabled);
+            if (enabled) mStartHeart(); else mStopHeart();
         });
     }
 

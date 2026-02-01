@@ -1,0 +1,256 @@
+---
+import Card from "../temple/Card.astro";
+import { Icon } from "astro-icon/components";
+
+const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+const weekDays = ['一', '二', '三', '四', '五', '六', '日'];
+---
+
+<Card>
+  <div id="calendar-widget" class="p-4">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-3">
+      <div class="font-bold text-base text-base-content relative ml-3 flex items-center
+                  before:w-1 before:h-4 before:rounded-md before:bg-primary
+                  before:absolute before:left-[-12px] before:top-[2px]">
+        <div id="calendar-title-container" 
+             class="flex items-center cursor-pointer hover:bg-base-300 px-2 py-1 -ml-2 rounded-lg transition-colors">
+          <span id="calendar-title" class="text-base font-bold select-none"></span>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-0.5">
+        <button id="back-to-today-btn" 
+                class="p-1.5 rounded-md hover:bg-base-300 text-primary transition-all invisible"
+                aria-label="返回今天">
+          <Icon name="material-symbols:restart-alt-rounded" class="text-lg" />
+        </button>
+        <button id="prev-month-btn" 
+                class="p-1.5 rounded-md hover:bg-base-300 text-base-content/60 hover:text-primary transition-colors text-lg font-bold"
+                aria-label="上个月">
+          ＜
+        </button>
+        <button id="next-month-btn" 
+                class="p-1.5 rounded-md hover:bg-base-300 text-base-content/60 hover:text-primary transition-colors text-lg font-bold"
+                aria-label="下个月">
+          ＞
+        </button>
+      </div>
+    </div>
+    
+    <!-- Calendar View -->
+    <div class="relative w-full overflow-hidden" style="min-height: 200px;">
+      <!-- Day View -->
+      <div id="calendar-view" class="w-full">
+        <!-- Weekday headers -->
+        <div class="grid grid-cols-7 gap-1 mb-2">
+          {weekDays.map((day) => (
+            <div class="text-center text-xs font-medium py-1 text-base-content/50">
+              {day}
+            </div>
+          ))}
+        </div>
+        <!-- Calendar grid -->
+        <div id="calendar-grid" class="grid grid-cols-7 gap-1"></div>
+      </div>
+      
+      <!-- Selection Panel (Month/Year picker) -->
+      <div id="selection-panel" 
+           class="absolute inset-0 bg-base-100 z-10 flex-col hidden opacity-0 transition-opacity duration-200">
+        <div id="selection-content" class="w-full h-full overflow-y-auto p-2 grid gap-2 content-start"></div>
+      </div>
+    </div>
+  </div>
+</Card>
+
+<script is:inline define:vars={{ monthNames }}>
+  document.addEventListener('astro:page-load', () => {
+    const now = new Date();
+    const todayYear = now.getFullYear();
+    const todayMonth = now.getMonth();
+    const todayDate = now.getDate();
+    
+    let currentYear = todayYear;
+    let currentMonth = todayMonth;
+    let currentView = 'day';
+    
+    const dom = {
+      titleContainer: document.getElementById('calendar-title-container'),
+      title: document.getElementById('calendar-title'),
+      prevBtn: document.getElementById('prev-month-btn'),
+      nextBtn: document.getElementById('next-month-btn'),
+      backTodayBtn: document.getElementById('back-to-today-btn'),
+      calendarView: document.getElementById('calendar-view'),
+      selectionPanel: document.getElementById('selection-panel'),
+      selectionContent: document.getElementById('selection-content'),
+      grid: document.getElementById('calendar-grid')
+    };
+    
+    if (!dom.title || !dom.grid) return;
+    
+    function updateHeader() {
+      dom.title.textContent = `${currentYear}年 ${monthNames[currentMonth]}`;
+      const isCurrentMonth = currentYear === todayYear && currentMonth === todayMonth;
+      
+      if (!isCurrentMonth) dom.backTodayBtn.classList.remove('invisible');
+      else dom.backTodayBtn.classList.add('invisible');
+      
+      const isDayView = currentView === 'day';
+      dom.prevBtn.style.visibility = isDayView ? 'visible' : 'hidden';
+      dom.nextBtn.style.visibility = isDayView ? 'visible' : 'hidden';
+    }
+    
+    function renderCalendar() {
+      updateHeader();
+      
+      // Monday = 0, ..., Sunday = 6 (ISO week)
+      const firstDay = new Date(currentYear, currentMonth, 1);
+      const firstDayOfWeek = (firstDay.getDay() + 6) % 7;
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      
+      let html = '';
+      
+      // Empty cells for days before first of month
+      for (let i = 0; i < firstDayOfWeek; i++) {
+        html += '<div class="aspect-square"></div>';
+      }
+      
+      // Days of month
+      for (let day = 1; day <= daysInMonth; day++) {
+        const isToday = currentYear === todayYear && currentMonth === todayMonth && day === todayDate;
+        
+        let bgClass = 'hover:bg-base-300 text-base-content border border-transparent';
+        
+        if (isToday) {
+          bgClass = 'text-primary font-bold bg-primary/10 border-2 border-primary';
+        }
+        
+        html += `
+          <div class="calendar-day aspect-square flex items-center justify-center rounded-md cursor-pointer text-sm transition-all duration-200 ${bgClass}">
+            ${day}
+          </div>
+        `;
+      }
+      
+      dom.grid.innerHTML = html;
+    }
+    
+    function showMonthPicker() {
+      currentView = 'month';
+      updateHeader();
+      dom.selectionPanel.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        dom.selectionPanel.classList.remove('opacity-0');
+        dom.selectionPanel.classList.add('flex');
+      });
+      
+      dom.selectionContent.className = 'w-full h-full p-3 grid grid-cols-3 gap-2 content-center';
+      
+      let html = '';
+      monthNames.forEach((name, index) => {
+        const isCurrent = index === currentMonth;
+        let cls = 'month-item cursor-pointer rounded-lg flex items-center justify-center py-3 transition-all hover:bg-base-300 border';
+        if (isCurrent) {
+          cls += ' border-primary text-primary bg-primary/5 font-bold';
+        } else {
+          cls += ' border-transparent text-base-content';
+        }
+        html += `<div class="${cls}" data-month="${index}">${name}</div>`;
+      });
+      
+      dom.selectionContent.innerHTML = html;
+    }
+    
+    function showYearPicker() {
+      currentView = 'year';
+      updateHeader();
+      
+      dom.selectionContent.className = 'w-full h-full p-3 grid grid-cols-4 gap-2 content-start overflow-y-auto';
+      
+      const minYear = todayYear - 10;
+      const maxYear = todayYear + 5;
+      
+      let html = '';
+      for (let y = minYear; y <= maxYear; y++) {
+        const isCurrent = y === currentYear;
+        let cls = 'year-item cursor-pointer rounded-lg flex items-center justify-center py-2 transition-all hover:bg-base-300 border text-sm';
+        if (isCurrent) {
+          cls += ' border-primary text-primary bg-primary/5 font-bold';
+        } else {
+          cls += ' border-transparent text-base-content';
+        }
+        html += `<div class="${cls}" data-year="${y}" id="year-${y}">${y}</div>`;
+      }
+      
+      dom.selectionContent.innerHTML = html;
+      
+      setTimeout(() => {
+        const el = document.getElementById(`year-${currentYear}`);
+        if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }, 50);
+    }
+    
+    function closeSelectionPanel() {
+      dom.selectionPanel.classList.add('opacity-0');
+      setTimeout(() => {
+        dom.selectionPanel.classList.add('hidden');
+        dom.selectionPanel.classList.remove('flex');
+        currentView = 'day';
+        renderCalendar();
+      }, 200);
+    }
+    
+    // Event listeners
+    dom.titleContainer?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (currentView === 'day') showMonthPicker();
+      else if (currentView === 'month') showYearPicker();
+      else closeSelectionPanel();
+    });
+    
+    dom.prevBtn?.addEventListener('click', () => {
+      currentMonth--;
+      if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+      renderCalendar();
+    });
+    
+    dom.nextBtn?.addEventListener('click', () => {
+      currentMonth++;
+      if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+      renderCalendar();
+    });
+    
+    dom.backTodayBtn?.addEventListener('click', () => {
+      currentYear = todayYear;
+      currentMonth = todayMonth;
+      if (currentView !== 'day') closeSelectionPanel();
+      else renderCalendar();
+    });
+    
+    dom.selectionContent?.addEventListener('click', (e) => {
+      const monthItem = e.target.closest('.month-item');
+      const yearItem = e.target.closest('.year-item');
+      
+      if (monthItem) {
+        e.stopPropagation();
+        currentMonth = parseInt(monthItem.getAttribute('data-month'));
+        closeSelectionPanel();
+      } else if (yearItem) {
+        e.stopPropagation();
+        currentYear = parseInt(yearItem.getAttribute('data-year'));
+        showMonthPicker();
+      }
+    });
+    
+    document.addEventListener('click', (e) => {
+      if (currentView === 'day') return;
+      const widget = document.getElementById('calendar-widget');
+      if (widget && !widget.contains(e.target)) {
+        closeSelectionPanel();
+      }
+    });
+    
+    // Initial render
+    renderCalendar();
+  });
+</script>
