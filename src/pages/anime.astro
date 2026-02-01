@@ -229,7 +229,7 @@ if (bilibiliItems.length > 0) {
     date: '', 
     overview: item.evaluate || item.brief || "暂无简介",
     link: `https://www.bilibili.com/bangumi/play/ss${item.season_id}`,
-    epStatus: item.new_ep?.index_show || ''
+    epStatus: item.progress || item.new_ep?.index_show || ''
   }));
 
   // 去重：如果 Bilibili 中存在同名番剧，则移除 TMDB 中的对应条目
@@ -257,7 +257,7 @@ if (bangumiItems.length > 0) {
             date: subject.date || '',
             overview: subject.short_summary || "暂无简介", // v0 might provide short_summary
             link: `https://bgm.tv/subject/${subject.id}`,
-            epStatus: item.ep_status ? `看到 ${item.ep_status} 话` : '未开始'
+            epStatus: subject.eps ? `全${subject.eps}话` : ''
         };
     });
     
@@ -384,6 +384,7 @@ const averageRating = ratedItems.length > 0
           data-type={anime.type}
           data-rating={anime.rating}
           data-date={anime.date}
+          data-source={anime.source}
         >
           <Card class="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden border border-base-200">
             <a href={anime.link} target="_blank" rel="noopener noreferrer" class="block h-full flex flex-col">
@@ -391,10 +392,9 @@ const averageRating = ratedItems.length > 0
               <div class="relative aspect-[2/3] overflow-hidden bg-base-200">
                 {anime.poster ? (
                   <img
-                    src={anime.poster}
+                    data-src={anime.poster}
                     alt={anime.title}
-                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    loading="lazy"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 anime-poster bg-base-300"
                     referrerpolicy="no-referrer"
                   />
                 ) : (
@@ -435,15 +435,15 @@ const averageRating = ratedItems.length > 0
                 </h2>
                 <div class="flex items-center justify-between mt-auto text-xs text-base-content/60">
                   <span class="flex items-center gap-1">
-                    {(anime.source === 'bilibili' || anime.source === 'bangumi') && anime.epStatus ? (
+                    {anime.source === 'bilibili' || anime.source === 'bangumi' ? (
                       <>
-                        <Icon name="lucide:play-circle" class="w-3 h-3" />
-                        {anime.epStatus}
+                        <svg class="w-3 h-3 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16 10,8"/></svg>
+                        <span>{anime.epStatus || '未开始'}</span>
                       </>
                     ) : (
                       <>
-                        <Icon name="lucide:calendar" class="w-3 h-3" />
-                        {anime.date ? anime.date.split('-')[0] : '未知'}
+                        <svg class="w-3 h-3 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <span>{anime.date ? anime.date.split('-')[0] : '未知'}</span>
                       </>
                     )}
                   </span>
@@ -564,6 +564,13 @@ const averageRating = ratedItems.length > 0
         pageItems.forEach(card => {
             card.style.display = ''; // 确保显示
             grid.appendChild(card);
+            
+            // 懒加载图片：只有当前页的图片才真正加载
+            const img = card.querySelector('img.anime-poster') as HTMLImageElement;
+            if (img && img.dataset.src && !img.hasAttribute('data-loaded')) {
+                img.src = img.dataset.src;
+                img.setAttribute('data-loaded', 'true');
+            }
         });
 
         // 5. 更新无结果提示

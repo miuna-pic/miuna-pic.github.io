@@ -41,3 +41,15 @@ declare module "dayjs/locale/*" {
   const locale: any;
   export default locale;
 }
+
+interface Window {
+  __bannerAstroListenersRegistered?: boolean;
+  __twikooAstroListenerRegistered?: boolean;
+  __hitokotoTimer?: number | null;
+  __hitokotoInstanceId?: number | null;
+  __bannerInitialLoadDone?: boolean;
+
+  // Other potential globals observed in previous context, adding for safety if needed later, 
+  // but strictly strictly these are the ones relevant to recent changes.
+  // The user specifically mentioned the warnings for banner and twikoo.
+}
