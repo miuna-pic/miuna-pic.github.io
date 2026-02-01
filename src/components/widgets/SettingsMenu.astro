@@ -815,6 +815,9 @@ const themes = [
         const snowflakes = ['❄', '❅', '❆', '✻', '✼'];
         
         function createSnowflake() {
+            // 如果页面不可见，不创建雪花
+            if (document.hidden) return;
+            
             const el = document.createElement('div');
             el.className = 'snowflake';
             el.textContent = snowflakes[Math.floor(Math.random() * snowflakes.length)];
@@ -834,6 +837,17 @@ const themes = [
         
         // Keep creating snowflakes - 更频繁
         window.__snowflakesAnimationId = setInterval(createSnowflake, 600);
+    }
+    
+    // 处理页面可见性变化 - 防止后台积攒
+    if (!window.__snowflakesVisibilityHandler) {
+        window.__snowflakesVisibilityHandler = function() {
+            if (document.hidden) {
+                // 页面隐藏时清除现有雪花，防止积攒
+                document.querySelectorAll('.snowflake').forEach(el => el.remove());
+            }
+        };
+        document.addEventListener('visibilitychange', window.__snowflakesVisibilityHandler);
     }
     
     function stopSnowflakesGlobal() {

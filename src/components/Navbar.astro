@@ -43,10 +43,19 @@ const typedMenu = SITE_MENU as MenuItem[];
               
         <!-- 桌面端水平菜单 - 响应主题颜色 -->      
         <div class="flex items-center space-x-1">      
-          {typedMenu.map((item) => (      
-            item.subItems ? (      
+          {typedMenu.map((item) => {
+            const isChildActive = item.subItems?.some(sub => currentPath === sub.href || (sub.href !== '/' && currentPath.startsWith(sub.href)));
+            const isActive = currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)) || isChildActive;
+            
+            return item.subItems ? (      
               <div class="dropdown dropdown-hover">      
-                <div tabindex="0" role="button" class="nav-item btn btn-ghost text-lg font-bold px-4 py-2 rounded-xl hover:bg-white/10 transition-all duration-200 text-base-content flex items-center gap-2">      
+                <div tabindex="0" role="button" class:list={[
+                  "nav-item relative text-lg font-bold px-4 py-2 rounded-xl hover:bg-primary/5 transition-all duration-200 flex items-center gap-2 cursor-pointer",
+                  isActive ? "text-primary" : "text-base-content hover:text-primary"
+                ]} data-href={item.href}>
+                  {isActive && (
+                    <span class="nav-active-bg absolute inset-0 bg-primary/10 rounded-xl -z-10"></span>
+                  )}
                   <Icon name={item.svg} class="w-5 h-5" />
                   <span>{item.text}</span>
                 </div>      
@@ -69,13 +78,19 @@ const typedMenu = SITE_MENU as MenuItem[];
               <a       
                 href={item.href}       
                 target={item.target || "_self"}       
-                class="nav-item btn btn-ghost text-lg font-bold px-4 py-2 rounded-xl hover:bg-white/10 transition-all duration-200 text-base-content flex items-center gap-2"      
-              >      
+                class:list={[
+                  "nav-item relative text-lg font-bold px-4 py-2 rounded-xl hover:bg-primary/5 transition-all duration-200 flex items-center gap-2",
+                  isActive ? "text-primary" : "text-base-content hover:text-primary"
+                ]}
+              >
+                {isActive && (
+                  <span class="nav-active-bg absolute inset-0 bg-primary/10 rounded-xl -z-10"></span>
+                )}
                 <Icon name={item.svg} class="w-5 h-5" />
                 {item.text}      
               </a>      
-            )      
-          ))}      
+            );
+          })}      
         </div>      
               
         <!-- 右侧工具栏 -->      
@@ -104,7 +119,7 @@ const typedMenu = SITE_MENU as MenuItem[];
                   isActive ? "text-primary" : "text-base-content/60 hover:text-primary"
                 ]} aria-label={item.text}>
                   {isActive && (
-                    <span class="absolute inset-0 bg-primary/10 rounded-full -z-10 scale-110"></span>
+                    <span class="mobile-active-bg absolute inset-0 bg-primary/10 rounded-full -z-10 scale-110"></span>
                   )}
                   <Icon name={item.svg} class="w-6 h-6" />
                 </div>
@@ -135,7 +150,7 @@ const typedMenu = SITE_MENU as MenuItem[];
             aria-label={item.text}
           >
             {isActive && !isHome && (
-              <span class="absolute inset-0 bg-primary/10 rounded-full -z-10 scale-110"></span>
+              <span class="mobile-active-bg absolute inset-0 bg-primary/10 rounded-full -z-10 scale-110"></span>
             )}
             {isHome ? (
               <div class:list={["relative w-10 h-10 rounded-full overflow-hidden border-2 transition-colors duration-300", isActive ? "border-primary" : "border-transparent group-hover:border-primary/50"]}>
@@ -202,8 +217,93 @@ const typedMenu = SITE_MENU as MenuItem[];
         ticking = true;
       }
     });
-    
+
     // 初始化执行一次以设置正确状态
     handleScroll();
   });
+
+  // 判断路径是否匹配激活状态
+  function isPathActive(href, currentPath) {
+    if (!href) return false;
+    if (currentPath === href) return true;
+    if (href !== '/' && currentPath.startsWith(href)) return true;
+    return false;
+  }
+
+  // 更新导航激活状态（桌面端和移动端）
+  function updateNavActive() {
+    const currentPath = window.location.pathname;
+    
+    // 处理移动端导航
+    document.querySelectorAll('#navbar-mobile a, #navbar-mobile [role="button"]').forEach(item => {
+      const href = item.getAttribute('href') || item.closest('.dropdown')?.querySelector('a')?.getAttribute('href');
+      if (!href) return;
+      
+      const isHome = href === '/';
+      const isActive = isPathActive(href, currentPath);
+      
+      // 移除旧的激活背景
+      item.querySelector('.mobile-active-bg')?.remove();
+      
+      // 头像边框处理
+      const avatarDiv = item.querySelector('.border-2');
+      
+      if (isActive) {
+        item.classList.add('text-primary');
+        item.classList.remove('text-base-content/60');
+        
+        // 添加激活背景（非首页）
+        if (!isHome && !item.querySelector('.mobile-active-bg')) {
+          const bgSpan = document.createElement('span');
+          bgSpan.className = 'mobile-active-bg absolute inset-0 bg-primary/10 rounded-full -z-10 scale-110';
+          item.insertBefore(bgSpan, item.firstChild);
+        }
+        
+        avatarDiv?.classList.replace('border-transparent', 'border-primary');
+      } else {
+        item.classList.remove('text-primary');
+        item.classList.add('text-base-content/60');
+        avatarDiv?.classList.replace('border-primary', 'border-transparent');
+      }
+    });
+    
+    // 处理桌面端导航
+    document.querySelectorAll('#navbar-desktop .nav-item').forEach(item => {
+      const href = item.getAttribute('href') || item.getAttribute('data-href');
+      if (!href) return;
+      
+      // 检查是否有子菜单激活
+      const dropdown = item.closest('.dropdown');
+      const isChildActive = dropdown 
+        ? [...dropdown.querySelectorAll('.dropdown-content a')].some(sub => isPathActive(sub.getAttribute('href'), currentPath))
+        : false;
+      
+      const isActive = isPathActive(href, currentPath) || isChildActive;
+      
+      // 移除旧的激活背景
+      item.querySelector('.nav-active-bg')?.remove();
+      
+      // 切换激活样式
+      item.classList.toggle('text-primary', isActive);
+      item.classList.toggle('text-base-content', !isActive);
+      item.classList.toggle('hover:text-primary', !isActive);
+      
+      // 添加激活背景
+      if (isActive) {
+        const bgSpan = document.createElement('span');
+        bgSpan.className = 'nav-active-bg absolute inset-0 bg-primary/10 rounded-xl -z-10';
+        item.insertBefore(bgSpan, item.firstChild);
+      }
+    });
+  }
+
+  // 每次脚本执行都更新导航激活状态（无论是初始加载还是页面切换）
+  updateNavActive();
+  
+  // 只注册一次事件监听器，防止重复
+  if (!window.__navbarAstroListenerRegistered) {
+    window.__navbarAstroListenerRegistered = true;
+    // Astro View Transitions 页面切换后更新导航激活状态
+    document.addEventListener('astro:page-load', updateNavActive);
+  }
 </script>
