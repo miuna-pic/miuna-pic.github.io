@@ -205,7 +205,7 @@ import CalendarBar from "./CalendarBar.astro";
     
   // ========== 当前应用状态 ==========
   // 配置你的 Vercel API 地址
-  const ACTIVITY_API_URL = 'https://your-activity-api.vercel.app/api/activity';
+  const ACTIVITY_API_URL = 'https://activity.000.moe/api/activity';
   const ACTIVITY_CACHE_KEY = 'current-activity-cache';
   const ACTIVITY_CACHE_TTL = 30000; // 30 秒缓存
   
@@ -257,6 +257,8 @@ import CalendarBar from "./CalendarBar.astro";
   }
     
   // 初始化函数  
+  let activityRefreshInterval = null;
+  
   function init() {  
     if (umamiConfig.enable) {
       // 总是加载最新数据，以保持实时更新
@@ -265,6 +267,17 @@ import CalendarBar from "./CalendarBar.astro";
     
     // 加载当前应用状态
     loadCurrentActivity();
+    
+    // 清除之前的定时器
+    if (activityRefreshInterval) {
+      clearInterval(activityRefreshInterval);
+    }
+    
+    // 每30秒自动刷新活动状态
+    activityRefreshInterval = setInterval(() => {
+      sessionStorage.removeItem(ACTIVITY_CACHE_KEY);
+      loadCurrentActivity();
+    }, 30000);
   }  
     
   // DOM 加载完成后初始化  
