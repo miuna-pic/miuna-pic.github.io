@@ -67,7 +67,7 @@ import CalendarBar from "./CalendarBar.astro";
 
     <!-- 当前应用状态 -->
     <div id="current-activity" class="text-center mb-2.5 transition text-sm">
-      <span class="opacity-70">Currently: </span>
+      <span class="opacity-70">PC: </span>
       <span id="current-app-name" class="font-bold tracking-wide bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">Loading...</span>
     </div>
       
@@ -202,12 +202,9 @@ import CalendarBar from "./CalendarBar.astro";
        if (visitorsElement) visitorsElement.textContent = '-';
     }
   }  
-    
   // ========== 当前应用状态 ==========
   // 配置你的 Vercel API 地址
   const ACTIVITY_API_URL = 'https://activity.000.moe/api/activity';
-  const ACTIVITY_CACHE_KEY = 'current-activity-cache';
-  const ACTIVITY_CACHE_TTL = 30000; // 30 秒缓存
   
   async function loadCurrentActivity() {
     const appNameEl = document.getElementById('current-app-name');
@@ -215,22 +212,8 @@ import CalendarBar from "./CalendarBar.astro";
     
     if (!appNameEl || !activityContainer) return;
     
-    // 检查缓存
-    const cachedStr = sessionStorage.getItem(ACTIVITY_CACHE_KEY);
-    if (cachedStr) {
-      try {
-        const { data, timestamp } = JSON.parse(cachedStr);
-        if (Date.now() - timestamp < ACTIVITY_CACHE_TTL) {
-          appNameEl.textContent = data.app || 'Offline';
-          return;
-        }
-      } catch (e) {
-        // 缓存解析失败
-      }
-    }
-    
     try {
-      const res = await fetch(ACTIVITY_API_URL);
+      const res = await fetch(ACTIVITY_API_URL, { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         const appName = data.app || 'Offline';
@@ -242,23 +225,16 @@ import CalendarBar from "./CalendarBar.astro";
         } else {
           appNameEl.textContent = appName;
         }
-        
-        // 存入缓存
-        sessionStorage.setItem(ACTIVITY_CACHE_KEY, JSON.stringify({
-          data: { app: appNameEl.textContent },
-          timestamp: Date.now()
-        }));
       } else {
         appNameEl.textContent = 'Offline';
       }
     } catch (e) {
+      console.error('Failed to load activity:', e);
       appNameEl.textContent = 'Offline';
     }
   }
     
   // 初始化函数  
-  let activityRefreshInterval = null;
-  
   function init() {  
     if (umamiConfig.enable) {
       // 总是加载最新数据，以保持实时更新
@@ -269,15 +245,15 @@ import CalendarBar from "./CalendarBar.astro";
     loadCurrentActivity();
     
     // 清除之前的定时器
-    if (activityRefreshInterval) {
-      clearInterval(activityRefreshInterval);
+    if (window._activityRefreshInterval) {
+      clearInterval(window._activityRefreshInterval);
+      window._activityRefreshInterval = null;
     }
     
-    // 每30秒自动刷新活动状态
-    activityRefreshInterval = setInterval(() => {
-      sessionStorage.removeItem(ACTIVITY_CACHE_KEY);
+    // 每10秒自动刷新活动状态
+    window._activityRefreshInterval = setInterval(() => {
       loadCurrentActivity();
-    }, 30000);
+    }, 10000);
   }  
     
   // DOM 加载完成后初始化  
@@ -287,17 +263,8 @@ import CalendarBar from "./CalendarBar.astro";
     init();  
   }  
     
-  // 监听 Astro 页面转换事件  
-  function initProfile() {  
-    // 页面切换时重新初始化  
-    init();  
-  }
-  
-  // 初始加载时调用
-  initProfile();
-  
   // Astro View Transitions 页面切换后重新初始化
-  document.addEventListener('astro:page-load', initProfile);
+  document.addEventListener('astro:page-load', init);
 </script> 
   
 <style>  
