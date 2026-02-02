@@ -64,6 +64,12 @@ import CalendarBar from "./CalendarBar.astro";
     <div class="text-center mb-2.5 transition font-bold tracking-wide bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent hover:scale-105 hover:from-purple-400 hover:to-pink-400">      
      {USER_DESCRIPTION}    
     </div>
+
+    <!-- 当前应用状态 -->
+    <div id="current-activity" class="text-center mb-2.5 transition text-sm">
+      <span class="opacity-70">Currently: </span>
+      <span id="current-app-name" class="font-bold tracking-wide bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">Loading...</span>
+    </div>
       
     <!-- 社交图标 - 恢复原始样式 -->  
     <div class="mt-4 pt-3 border-t border-base-content/20">  
@@ -197,7 +203,58 @@ import CalendarBar from "./CalendarBar.astro";
     }
   }  
     
+  // ========== 当前应用状态 ==========
+  // 配置你的 Vercel API 地址
+  const ACTIVITY_API_URL = 'https://your-activity-api.vercel.app/api/activity';
+  const ACTIVITY_CACHE_KEY = 'current-activity-cache';
+  const ACTIVITY_CACHE_TTL = 30000; // 30 秒缓存
   
+  async function loadCurrentActivity() {
+    const appNameEl = document.getElementById('current-app-name');
+    const activityContainer = document.getElementById('current-activity');
+    
+    if (!appNameEl || !activityContainer) return;
+    
+    // 检查缓存
+    const cachedStr = sessionStorage.getItem(ACTIVITY_CACHE_KEY);
+    if (cachedStr) {
+      try {
+        const { data, timestamp } = JSON.parse(cachedStr);
+        if (Date.now() - timestamp < ACTIVITY_CACHE_TTL) {
+          appNameEl.textContent = data.app || 'Offline';
+          return;
+        }
+      } catch (e) {
+        // 缓存解析失败
+      }
+    }
+    
+    try {
+      const res = await fetch(ACTIVITY_API_URL);
+      if (res.ok) {
+        const data = await res.json();
+        const appName = data.app || 'Offline';
+        const updatedAt = data.updatedAt ? new Date(data.updatedAt) : null;
+        
+        // 检查是否超过5分钟没有更新（可能离线）
+        if (updatedAt && Date.now() - updatedAt.getTime() > 5 * 60 * 1000) {
+          appNameEl.textContent = 'Offline';
+        } else {
+          appNameEl.textContent = appName;
+        }
+        
+        // 存入缓存
+        sessionStorage.setItem(ACTIVITY_CACHE_KEY, JSON.stringify({
+          data: { app: appNameEl.textContent },
+          timestamp: Date.now()
+        }));
+      } else {
+        appNameEl.textContent = 'Offline';
+      }
+    } catch (e) {
+      appNameEl.textContent = 'Offline';
+    }
+  }
     
   // 初始化函数  
   function init() {  
@@ -205,6 +262,9 @@ import CalendarBar from "./CalendarBar.astro";
       // 总是加载最新数据，以保持实时更新
       loadSiteStats();  
     }
+    
+    // 加载当前应用状态
+    loadCurrentActivity();
   }  
     
   // DOM 加载完成后初始化  
