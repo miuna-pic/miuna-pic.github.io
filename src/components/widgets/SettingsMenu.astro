@@ -263,6 +263,53 @@ const themes = [
       </details>
     </li>
 
+
+    <!-- Activity Status -->
+    <li>
+      <details>
+        <summary class="font-medium flex justify-between items-center p-2 hover:bg-base-200 rounded-lg w-full">
+          <div class="flex items-center gap-2">
+            <Icon name="material-symbols:monitor-heart-outline" class="w-5 h-5" />
+            Activity
+          </div>
+        </summary>
+        <div id="desktop-activity-container" class="p-2 bg-base-100 rounded-box flex flex-col gap-1 cursor-default min-w-[200px]">
+          <!-- PC -->
+          <div class="flex justify-between items-center px-1">
+            <div class="flex items-center gap-2 text-xs opacity-70">
+              <Icon name="material-symbols:computer-outline" class="w-3.5 h-3.5" />
+              <span>PC</span>
+            </div>
+            <span id="desktop-activity-pc" class="text-xs font-bold tracking-wide bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">Loading...</span>
+          </div>
+          <!-- Phone -->
+          <div class="flex justify-between items-center px-1">
+            <div class="flex items-center gap-2 text-xs opacity-70">
+              <Icon name="material-symbols:phone-android-outline" class="w-3.5 h-3.5" />
+              <span>Phone</span>
+            </div>
+            <span id="desktop-activity-phone" class="text-xs font-bold tracking-wide bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">Loading...</span>
+          </div>
+          <!-- Tablet -->
+          <div class="flex justify-between items-center px-1">
+            <div class="flex items-center gap-2 text-xs opacity-70">
+              <Icon name="material-symbols:tablet-android-outline" class="w-3.5 h-3.5" />
+              <span>Tablet</span>
+            </div>
+            <span id="desktop-activity-tablet" class="text-xs font-bold tracking-wide bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">Loading...</span>
+          </div>
+          <!-- Music -->
+          <div class="flex justify-between items-center px-1">
+            <div class="flex items-center gap-2 text-xs opacity-70">
+              <Icon name="lucide:music" class="w-3.5 h-3.5" />
+              <span>Music</span>
+            </div>
+            <span id="desktop-activity-music" class="text-xs font-bold tracking-wide bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">Loading...</span>
+          </div>
+        </div>
+      </details>
+    </li>
+
     <!-- Site Info -->
     <li>
       <details>
@@ -272,7 +319,7 @@ const themes = [
             Site Info
           </div>
         </summary>
-        <div class="p-2 bg-base-100 rounded-box flex flex-col gap-1 cursor-default min-w-[200px]">
+        <div id="desktop-site-info-container" class="p-2 bg-base-100 rounded-box flex flex-col gap-1 cursor-default min-w-[200px]">
           <div class="flex justify-between items-center px-1">
             <span class="text-xs opacity-70">Last Update</span>
             <span id="site-last-update" class="text-xs font-mono truncate max-w-[120px]">...</span>
@@ -297,6 +344,49 @@ const themes = [
   document.addEventListener("DOMContentLoaded", () => {
     // Prevent dropdown close on container click
     document.getElementById('desktop-animetrace-container')?.addEventListener('click', e => e.stopPropagation());
+    document.getElementById('desktop-activity-container')?.addEventListener('click', e => e.stopPropagation());
+    document.getElementById('desktop-site-info-container')?.addEventListener('click', e => e.stopPropagation());
+
+    // ========== Activity Status Logic ==========
+    const ACTIVITY_API_URL = 'https://activity.000.moe/api/activity';
+    const DESKTOP_DEVICE_MAP = {
+        'PC': 'desktop-activity-pc',
+        'Phone': 'desktop-activity-phone',
+        'Tablet': 'desktop-activity-tablet',
+        'Music': 'desktop-activity-music'
+    };
+
+    const updateDesktopActivity = async () => {
+        try {
+            const res = await fetch(ACTIVITY_API_URL, { cache: 'no-store' });
+            if (!res.ok) throw new Error('API unstable');
+            const data = await res.json();
+            const devices = data.devices || {};
+
+            for (const [device, elId] of Object.entries(DESKTOP_DEVICE_MAP)) {
+                const el = document.getElementById(elId);
+                if (!el) continue;
+                const deviceData = devices[device] || { app: 'Offline', updatedAt: null };
+                
+                if (deviceData.updatedAt && Date.now() - new Date(deviceData.updatedAt).getTime() > 5 * 60 * 1000) {
+                    el.textContent = 'Offline';
+                } else {
+                    el.textContent = deviceData.app || 'Offline';
+                }
+            }
+        } catch (e) {
+            console.error('Desktop activity error:', e);
+            Object.values(DESKTOP_DEVICE_MAP).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = 'Offline';
+            });
+        }
+    };
+
+    updateDesktopActivity();
+    if (window._desktopActivityInterval) clearInterval(window._desktopActivityInterval);
+    window._desktopActivityInterval = setInterval(updateDesktopActivity, 10000);
+
 
     // Theme classification
     const DARK_THEMES = ['dark', 'synthwave', 'halloween', 'forest', 'black', 'luxury', 'dracula', 'business', 'night', 'coffee', 'dim', 'sunset'];

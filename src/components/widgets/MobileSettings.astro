@@ -89,9 +89,6 @@ const themes = [
       </details>
     </li>
 
-    <!-- Config Button -->
-
-
     <!-- Theme Selector -->
     <li>
       <details>
@@ -184,12 +181,10 @@ const themes = [
             <span id="mobile-network-isp" class="text-xs font-mono truncate max-w-[150px]">...</span>
           </div>
           <div class="flex justify-between items-center px-1">
-
             <span class="text-xs opacity-70">NAT</span>
             <span id="mobile-network-nat" class="text-xs font-mono truncate max-w-[150px]">...</span>
           </div>
           <button id="mobile-refresh-network-status" class="btn btn-sm btn-outline w-full mt-2">Refresh</button>
-
         </div>
       </details>
     </li>
@@ -269,6 +264,80 @@ const themes = [
            <div id="mobile-animetrace-result" class="text-xs font-mono bg-base-200 p-2 rounded max-h-40 overflow-y-auto hidden whitespace-pre-wrap"></div>
         </div>
       </details>
+    </li>
+
+    <!-- Activity Status -->
+    <li>
+      <details>
+        <summary class="font-medium flex justify-between items-center p-2 hover:bg-base-300 rounded-lg w-full">
+          <div class="flex items-center gap-2">
+            <Icon name="material-symbols:monitor-heart-outline" class="w-5 h-5" />
+            Activity
+          </div>
+        </summary>
+        <div id="mobile-activity-container" class="p-2 bg-base-100 rounded-box flex flex-col gap-1 cursor-default">
+          <!-- PC -->
+          <div class="flex justify-between items-center px-1">
+            <div class="flex items-center gap-2 text-xs opacity-70">
+              <Icon name="material-symbols:computer-outline" class="w-3.5 h-3.5" />
+              <span>PC</span>
+            </div>
+            <span id="mobile-activity-pc" class="text-xs font-bold tracking-wide bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">Loading...</span>
+          </div>
+          <!-- Phone -->
+          <div class="flex justify-between items-center px-1">
+            <div class="flex items-center gap-2 text-xs opacity-70">
+              <Icon name="material-symbols:phone-android-outline" class="w-3.5 h-3.5" />
+              <span>Phone</span>
+            </div>
+            <span id="mobile-activity-phone" class="text-xs font-bold tracking-wide bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">Loading...</span>
+          </div>
+          <!-- Tablet -->
+          <div class="flex justify-between items-center px-1">
+            <div class="flex items-center gap-2 text-xs opacity-70">
+              <Icon name="material-symbols:tablet-android-outline" class="w-3.5 h-3.5" />
+              <span>Tablet</span>
+            </div>
+            <span id="mobile-activity-tablet" class="text-xs font-bold tracking-wide bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">Loading...</span>
+          </div>
+          <!-- Music -->
+          <div class="flex justify-between items-center px-1">
+            <div class="flex items-center gap-2 text-xs opacity-70">
+              <Icon name="lucide:music" class="w-3.5 h-3.5" />
+              <span>Music</span>
+            </div>
+            <span id="mobile-activity-music" class="text-xs font-bold tracking-wide bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">Loading...</span>
+          </div>
+        </div>
+      </details>
+    </li>
+
+    <!-- Site Info -->
+    <li>
+      <details>
+        <summary class="font-medium flex justify-between items-center p-2 hover:bg-base-300 rounded-lg w-full">
+          <div class="flex items-center gap-2">
+            <Icon name="material-symbols:info-outline" class="w-5 h-5" />
+            Site Info
+          </div>
+        </summary>
+        <div id="mobile-site-info-container" class="p-2 bg-base-100 rounded-box flex flex-col gap-1 cursor-default">
+          <div class="flex justify-between items-center px-1">
+            <span class="text-xs opacity-70">Last Update</span>
+            <span id="mobile-site-last-update" class="text-xs font-mono truncate max-w-[120px]">...</span>
+          </div>
+          <div class="flex justify-between items-center px-1">
+            <span class="text-xs opacity-70">Commit</span>
+            <a id="mobile-site-commit-hash" href="#" target="_blank" class="text-xs font-mono text-base-content hover:underline truncate max-w-[120px]">...</a>
+          </div>
+          <div class="flex justify-between items-center px-1">
+            <span class="text-xs opacity-70">Actions</span>
+            <span id="mobile-site-actions-status" class="text-xs font-mono">...</span>
+          </div>
+          <button id="mobile-refresh-site-info" class="btn btn-sm btn-outline w-full mt-2">Refresh</button>
+        </div>
+      </details>
+    </li>
   </ul>
 </details>
 
@@ -276,6 +345,87 @@ const themes = [
   document.addEventListener("DOMContentLoaded", () => {
     // Prevent dropdown close on container click
     document.getElementById('mobile-animetrace-container')?.addEventListener('click', e => e.stopPropagation());
+    document.getElementById('mobile-activity-container')?.addEventListener('click', e => e.stopPropagation());
+    document.getElementById('mobile-site-info-container')?.addEventListener('click', e => e.stopPropagation());
+
+    // ========== Activity Status Logic (Mobile) ==========
+    const ACTIVITY_API_URL = 'https://activity.000.moe/api/activity';
+    const MOBILE_DEVICE_MAP = {
+        'PC': 'mobile-activity-pc',
+        'Phone': 'mobile-activity-phone',
+        'Tablet': 'mobile-activity-tablet',
+        'Music': 'mobile-activity-music'
+    };
+
+    const updateMobileActivity = async () => {
+        try {
+            const res = await fetch(ACTIVITY_API_URL, { cache: 'no-store' });
+            if (!res.ok) throw new Error('API unstable');
+            const data = await res.json();
+            const devices = data.devices || {};
+
+            for (const [device, elId] of Object.entries(MOBILE_DEVICE_MAP)) {
+                const el = document.getElementById(elId);
+                if (!el) continue;
+                const deviceData = devices[device] || { app: 'Offline', updatedAt: null };
+                
+                if (deviceData.updatedAt && Date.now() - new Date(deviceData.updatedAt).getTime() > 5 * 60 * 1000) {
+                    el.textContent = 'Offline';
+                } else {
+                    el.textContent = deviceData.app || 'Offline';
+                }
+            }
+        } catch (e) {
+            console.error('Mobile activity error:', e);
+            Object.values(MOBILE_DEVICE_MAP).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = 'Offline';
+            });
+        }
+    };
+
+    updateMobileActivity();
+    if (window._mobileActivityInterval) clearInterval(window._mobileActivityInterval);
+    window._mobileActivityInterval = setInterval(updateMobileActivity, 10000);
+
+    // ========== Site Info Logic (Mobile) ==========
+    const updateMobileSiteInfo = async () => {
+        const lastUpdateEl = document.getElementById('mobile-site-last-update');
+        const hashEl = document.getElementById('mobile-site-commit-hash');
+        const statusEl = document.getElementById('mobile-site-actions-status');
+
+        if (!lastUpdateEl || !hashEl || !statusEl) return;
+
+        try {
+            const res = await fetch('https://api.github.com/repos/miuna-pic/miuna-pic.github.io/commits/main');
+            const data = await res.json();
+            
+            const date = new Date(data.commit.author.date);
+            lastUpdateEl.textContent = date.toLocaleDateString();
+            lastUpdateEl.title = date.toLocaleString();
+            
+            hashEl.textContent = data.sha.substring(0, 7);
+            hashEl.href = data.html_url;
+
+            // Check actions status
+            const aRes = await fetch('https://api.github.com/repos/miuna-pic/miuna-pic.github.io/actions/runs?per_page=1');
+            const aData = await aRes.json();
+            if (aData.workflow_runs && aData.workflow_runs[0]) {
+                const run = aData.workflow_runs[0];
+                statusEl.textContent = run.conclusion === 'success' ? 'Passing' : run.status;
+                statusEl.className = 'text-xs font-mono ' + (run.conclusion === 'success' ? 'text-success' : 'text-warning');
+            }
+        } catch (e) {
+            console.error('Mobile Site Info error:', e);
+        }
+    };
+
+    updateMobileSiteInfo();
+    const mRefreshSiteBtn = document.getElementById('mobile-refresh-site-info');
+    if (mRefreshSiteBtn) {
+        mRefreshSiteBtn.addEventListener('click', updateMobileSiteInfo);
+    }
+
 
     // Theme classification
     const DARK_THEMES = ['dark', 'synthwave', 'halloween', 'forest', 'black', 'luxury', 'dracula', 'business', 'night', 'coffee', 'dim', 'sunset'];
@@ -616,16 +766,6 @@ const themes = [
         localStorage.setItem("theme", newTheme);
         
         updateMobileThemeIcons(newTheme);
-        
-        // Sync with other toggles if any
-        const allToggles = document.querySelectorAll("[data-theme-toggle]");
-        allToggles.forEach(() => {
-           // Assuming other toggles have similar structure or logic, 
-           // but since we are in mobile settings, we might be the only one active or visible.
-           // If needed, dispatch a custom event or manually update them.
-           // For now, just updating the DOM attribute is enough for styles, 
-           // but icons on other toggles might need refresh if they are visible.
-        });
       });
     }
 
@@ -748,16 +888,9 @@ const themes = [
                 const data = await response.json();
                 
                 let output = '';
-                
-                // 1. AI Status
-                if (typeof data.ai !== 'undefined') {
-                     output += `AI Generated: ${data.ai ? 'Yes' : 'No'}\n\n`;
-                }
-
-                // 2. Data loop
+                if (typeof data.ai !== 'undefined') output += `AI Generated: ${data.ai ? 'Yes' : 'No'}\n\n`;
                 if (data.data && Array.isArray(data.data)) {
                     data.data.forEach((item) => {
-                         // API uses 'character' as the key for the list of matches
                          if (item.character && Array.isArray(item.character)) {
                              item.character.forEach(c => {
                                  output += `Work: ${c.work || 'Unknown'}\n`;
@@ -766,14 +899,8 @@ const themes = [
                          }
                     });
                 }
-
-                if (!output.trim()) {
-                     output = 'No recognized data found.';
-                }
-                
+                if (!output.trim()) output = 'No recognized data found.';
                 mTraceResult.textContent = output;
-                console.log('Mobile AnimeTrace Data:', data);
-
             } catch (e) {
                 mTraceResult.textContent = 'Error: ' + e.message;
             } finally {
