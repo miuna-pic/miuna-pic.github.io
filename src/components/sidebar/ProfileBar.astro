@@ -65,10 +65,40 @@ import CalendarBar from "./CalendarBar.astro";
      {USER_DESCRIPTION}    
     </div>
 
-    <!-- 当前应用状态 -->
-    <div id="current-activity" class="text-center mb-2.5 transition text-sm">
-      <span class="opacity-70">PC: </span>
-      <span id="current-app-name" class="font-bold tracking-wide bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">Loading...</span>
+    <!-- 当前应用状态 - 多设备 -->
+    <div id="current-activity" class="mb-2.5 transition text-sm space-y-1">
+      <!-- PC -->
+      <div class="flex items-center justify-center gap-2">
+        <div class="flex items-center gap-1 opacity-70 text-xs">
+          <Icon name="material-symbols:computer-outline" class="w-3.5 h-3.5" />
+          <span>PC:</span>
+        </div>
+        <div id="activity-pc" class="font-bold tracking-wide bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent text-xs">Loading...</div>
+      </div>
+      <!-- Phone -->
+      <div class="flex items-center justify-center gap-2">
+        <div class="flex items-center gap-1 opacity-70 text-xs">
+          <Icon name="material-symbols:phone-android-outline" class="w-3.5 h-3.5" />
+          <span>Phone:</span>
+        </div>
+        <div id="activity-phone" class="font-bold tracking-wide bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent text-xs">Loading...</div>
+      </div>
+      <!-- Tablet -->
+      <div class="flex items-center justify-center gap-2">
+        <div class="flex items-center gap-1 opacity-70 text-xs">
+          <Icon name="material-symbols:tablet-android-outline" class="w-3.5 h-3.5" />
+          <span>Tablet:</span>
+        </div>
+        <div id="activity-tablet" class="font-bold tracking-wide bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent text-xs">Loading...</div>
+      </div>
+      <!-- Music -->
+      <div class="flex items-center justify-center gap-2">
+        <div class="flex items-center gap-1 opacity-70 text-xs">
+          <Icon name="lucide:music" class="w-3.5 h-3.5" />
+          <span>Music:</span>
+        </div>
+        <div id="activity-music" class="font-bold tracking-wide bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent text-xs">Loading...</div>
+      </div>
     </div>
       
     <!-- 社交图标 - 恢复原始样式 -->  
@@ -206,31 +236,52 @@ import CalendarBar from "./CalendarBar.astro";
   // 配置你的 Vercel API 地址
   const ACTIVITY_API_URL = 'https://activity.000.moe/api/activity';
   
-  async function loadCurrentActivity() {
-    const appNameEl = document.getElementById('current-app-name');
-    const activityContainer = document.getElementById('current-activity');
+  // 设备ID映射
+  const DEVICE_ELEMENT_MAP = {
+    'PC': 'activity-pc',
+    'Phone': 'activity-phone',
+    'Tablet': 'activity-tablet',
+    'Music': 'activity-music'
+  };
+  
+  function updateDeviceStatus(deviceId, appName, updatedAt) {
+    const el = document.getElementById(deviceId);
+    if (!el) return;
     
-    if (!appNameEl || !activityContainer) return;
+    // 检查是否超过5分钟没有更新（可能离线）
+    if (updatedAt && Date.now() - new Date(updatedAt).getTime() > 5 * 60 * 1000) {
+      el.textContent = 'Offline';
+    } else {
+      el.textContent = appName || 'Offline';
+    }
+  }
+  
+  async function loadCurrentActivity() {
+    const activityContainer = document.getElementById('current-activity');
+    if (!activityContainer) return;
     
     try {
       const res = await fetch(ACTIVITY_API_URL, { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
-        const appName = data.app || 'Offline';
-        const updatedAt = data.updatedAt ? new Date(data.updatedAt) : null;
+        const devices = data.devices || {};
         
-        // 检查是否超过5分钟没有更新（可能离线）
-        if (updatedAt && Date.now() - updatedAt.getTime() > 5 * 60 * 1000) {
-          appNameEl.textContent = 'Offline';
-        } else {
-          appNameEl.textContent = appName;
+        // 更新每个设备的状态
+        for (const [device, elementId] of Object.entries(DEVICE_ELEMENT_MAP)) {
+          const deviceData = devices[device] || { app: 'Offline', updatedAt: null };
+          updateDeviceStatus(elementId, deviceData.app, deviceData.updatedAt);
         }
       } else {
-        appNameEl.textContent = 'Offline';
+        // API 请求失败，设置所有设备为 Offline
+        for (const elementId of Object.values(DEVICE_ELEMENT_MAP)) {
+          updateDeviceStatus(elementId, 'Offline', null);
+        }
       }
     } catch (e) {
       console.error('Failed to load activity:', e);
-      appNameEl.textContent = 'Offline';
+      for (const elementId of Object.values(DEVICE_ELEMENT_MAP)) {
+        updateDeviceStatus(elementId, 'Offline', null);
+      }
     }
   }
     
