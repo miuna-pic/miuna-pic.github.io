@@ -371,7 +371,12 @@ const themes = [
                 if (deviceData.updatedAt && Date.now() - new Date(deviceData.updatedAt).getTime() > 5 * 60 * 1000) {
                     el.textContent = 'Offline';
                 } else {
-                    el.textContent = deviceData.app || 'Offline';
+                    let displayName = deviceData.app || 'Offline';
+                    // 对于音乐设备，只显示歌曲名（移除 " - Artist" 部分）
+                    if (device === 'Music' && displayName !== 'Offline' && displayName.includes(' - ')) {
+                        displayName = displayName.split(' - ')[0];
+                    }
+                    el.textContent = displayName;
                 }
             }
         } catch (e) {

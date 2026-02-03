@@ -254,7 +254,12 @@ import CalendarBar from "./CalendarBar.astro";
     if (updatedAt && Date.now() - new Date(updatedAt).getTime() > 5 * 60 * 1000) {
       el.textContent = 'Offline';
     } else {
-      el.textContent = appName || 'Offline';
+      let displayName = appName || 'Offline';
+      // 对于音乐设备，只显示歌曲名（移除 " - Artist" 部分）
+      if (deviceId === 'activity-music' && displayName !== 'Offline' && displayName.includes(' - ')) {
+        displayName = displayName.split(' - ')[0];
+      }
+      el.textContent = displayName;
     }
   }
   
