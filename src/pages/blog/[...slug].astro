@@ -124,7 +124,10 @@ const url = new URL(`/blog/${blog.slug}`, Astro.url.origin);
   <script>
     import { Fancybox } from "@fancyapps/ui";
 
-    document.addEventListener("astro:page-load", () => {
+    function initFancybox() {
+      // Destroy existing instances first
+      Fancybox.destroy();
+      
       const images = document.querySelectorAll("#content img");
       
       images.forEach((img) => {
@@ -163,6 +166,16 @@ const url = new URL(`/blog/${blog.slug}`, Astro.url.origin);
           },
         },
       } as any);
-    });
+    }
+    
+    // Initialize on page load
+    document.addEventListener("astro:page-load", initFancybox);
+    
+    // Also initialize immediately for direct page loads
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+      initFancybox();
+    } else {
+      document.addEventListener("DOMContentLoaded", initFancybox);
+    }
   </script>
 </BaseLayout>

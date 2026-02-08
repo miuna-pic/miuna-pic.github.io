@@ -236,10 +236,45 @@ async function renderContent(content: string, momentId: string) {
   });
 
   
-  // Wrap images in fancybox link
-  html = html.replace(/<img[^>]+src="([^"]+)"[^>]*>/g, (match, src) => {
-    return `<a href="${src}" data-fancybox="gallery-${momentId}" class="cursor-zoom-in block rounded-lg overflow-hidden">${match}</a>`;
-  });
+  // Extract all images and wrap them in a grid layout
+  const imgRegex = /<img[^>]+src="([^"]+)"[^>]*>/g;
+  const images: string[] = [];
+  let imgMatch;
+  while ((imgMatch = imgRegex.exec(html)) !== null) {
+    images.push(imgMatch[1]);
+  }
+  
+  if (images.length > 0) {
+    // Remove all <p> tags containing only images
+    html = html.replace(/<p>\s*(<img[^>]+>)\s*<\/p>/g, '$1');
+    // Remove standalone img tags (we'll add them back in a grid)
+    html = html.replace(/<img[^>]+src="([^"]+)"[^>]*>/g, '');
+    // Clean up empty paragraphs
+    html = html.replace(/<p>\s*<\/p>/g, '');
+    
+    let gridHtml: string;
+    
+    if (images.length === 1) {
+      // Single image: only limit max height for very tall images, otherwise keep original ratio
+      gridHtml = `<div class="moment-image-single my-3">
+        <a href="${images[0]}" data-fancybox="gallery-${momentId}" class="cursor-zoom-in inline-block rounded-lg overflow-hidden bg-base-200">
+          <img src="${images[0]}" alt="Moment image" loading="lazy" class="max-w-full max-h-96 object-contain transition-transform duration-500 hover:scale-105" />
+        </a>
+      </div>`;
+    } else {
+      // Multiple images: 2 columns, square aspect ratio
+      gridHtml = `<div class="moment-image-grid grid grid-cols-2 gap-2 my-3">
+        ${images.map(src => `
+          <a href="${src}" data-fancybox="gallery-${momentId}" class="cursor-zoom-in block rounded-lg overflow-hidden aspect-square bg-base-200">
+            <img src="${src}" alt="Moment image" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" />
+          </a>
+        `).join('')}
+      </div>`;
+    }
+    
+    // Append grid at the end of HTML content
+    html = html.trim() + gridHtml;
+  }
   
   // Replace Steam placeholders with actual cards
   for (const { placeholder, url, appId } of steamLinks) {
@@ -735,7 +770,11 @@ async function renderContent(content: string, momentId: string) {
   <script>
     import { Fancybox } from "@fancyapps/ui";
     
-    document.addEventListener("astro:page-load", () => {
+    function initFancybox() {
+      // Destroy existing instances first
+      Fancybox.destroy();
+      
+      // Bind to all fancybox elements
       Fancybox.bind("[data-fancybox]", {
         Toolbar: {
           display: {
@@ -753,7 +792,17 @@ async function renderContent(content: string, momentId: string) {
           },
         },
       } as any);
-    });
+    }
+    
+    // Initialize on page load
+    document.addEventListener("astro:page-load", initFancybox);
+    
+    // Also initialize immediately for direct page loads
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+      initFancybox();
+    } else {
+      document.addEventListener("DOMContentLoaded", initFancybox);
+    }
   </script>
 
   <style>
